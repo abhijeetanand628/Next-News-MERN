@@ -1,5 +1,6 @@
 import {User} from "../models/user.model.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export const registerUser = async(req, res) => {
     try {
@@ -46,6 +47,76 @@ export const registerUser = async(req, res) => {
 
     } catch (error) {
         console.log("Signup error : ", error);
+        res.status(500)
+        .json({
+            message: "Server error"
+        });
+    }
+}
+
+
+export const loginUser = async(req, res) => {
+    try {
+        // 1. Grab data
+        const {email, password} = req.body;
+
+        // 2. Validate data
+        if(!email || !password)
+        {
+            return res
+            .status(400)
+            .json({
+                message: "Email and password are required"
+            })
+        }
+
+        // 3. Check if user exists in DB
+        const user = await User.findOne({email});
+
+        if(!user)
+        {
+            return res
+            .status(404)
+            .json({
+                message: "User not found"
+            })
+        }
+
+        // 4. Compare encrypted password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if(!isPasswordValid)
+        {
+            return res
+            .status(401)
+            .json({
+                message: "Password Incorrect"
+            })
+        }
+
+        // 5. Generate JWT token
+        const token = jwt.sign(
+            {id: user._id},
+            process.env.JWT_SECRET,
+            {expiresIn: process.env.JWT_EXPIRES_IN}
+        );
+
+        // 6. Send response
+        return res
+        .status(200)
+        .json({
+            message: "User logged in successfully",
+            token,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                
+            }
+        })
+
+    } catch (error) {
+        console.log("Login error : ", error);
         res.status(500)
         .json({
             message: "Server error"
