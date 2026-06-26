@@ -23,7 +23,10 @@ const userSchema = new Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Article"
         }
-    ]
+    ],
+    profileImage: {
+        type: String
+    }
 }, {timestamps: true})
 
 
