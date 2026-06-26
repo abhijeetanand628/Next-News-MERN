@@ -211,3 +211,37 @@ export const updatePassword = async(req, res) => {
         message: "Password updated successfully"
     })
 }
+
+
+export const updateAccountDetails = async(req, res) => {
+    const {name, email} = req.body;
+
+    if(!name || !email)
+    {
+        return res
+        .status(400)
+        .json({
+            message: "Name and email are required"
+        })
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                name: name,
+                email: email.toLowercase()
+            }
+        },
+        {
+            returnDocument: "after"
+        }
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json({
+        message: "Account details updated successfully",
+        user
+    })
+}
