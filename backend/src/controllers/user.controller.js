@@ -123,3 +123,34 @@ export const loginUser = async(req, res) => {
         });
     }
 }
+
+
+export const logoutUser = async(req, res) => {
+    try {
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $unset: {
+                    token: 1
+                }
+            },
+            {
+                returnDocument: "after"
+            }   
+        );
+
+        return res
+        .status(200)
+        .json({
+            message: "User logged out successfully"
+        })
+        
+    } catch (error) {
+        console.log("Logout error : ", error);
+        return res
+        .status(500)
+        .json({
+            message: "Server error"
+        })
+    }
+}
