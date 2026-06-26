@@ -239,22 +239,12 @@ const Header = () => {
               />
             )}
 
-            {!user ? (
-              <User
-                onClick={() => navigate("/login")}
-                className="text-gray-700 hover:text-black cursor-pointer"
-                size={18}
-                title="Login"
-              />
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="text-gray-700 hover:text-black text-xs sm:text-sm font-medium px-2 py-1 bg-gray-100 rounded-lg transition-colors hover:bg-gray-200 cursor-pointer"
-                title={`Logged in as ${user.name}`}
-              >
-                Logout
-              </button>
-            )}
+            <User
+              onClick={() => !user && navigate("/login")}
+              className={`text-gray-700 ${!user ? 'hover:text-black cursor-pointer' : ''}`}
+              size={18}
+              title={user ? `Logged in as ${user.name}` : "Login"}
+            />
 
             <Search
               onClick={search}
@@ -280,6 +270,8 @@ const Header = () => {
         selectedCategory={selectedCategory}
         onSelectCategory={categorySelect}
         goHome={goHome}
+        user={user}
+        onLogout={handleLogout}
       />
     </>
   );
