@@ -127,6 +127,7 @@ export const loginUser = async(req, res) => {
 
 export const logoutUser = async(req, res) => {
     try {
+        // Remove token from user
         await User.findByIdAndUpdate(
             req.user._id,
             {
@@ -139,12 +140,13 @@ export const logoutUser = async(req, res) => {
             }   
         );
 
+        // Clear the cookie
         return res
         .status(200)
         .json({
             message: "User logged out successfully"
         })
-        
+
     } catch (error) {
         console.log("Logout error : ", error);
         return res

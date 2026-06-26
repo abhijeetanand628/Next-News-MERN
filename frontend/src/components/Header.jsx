@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Search, Menu } from "lucide-react";
+import { Search, Menu, User } from "lucide-react";
 import SideBar from "./SideBar";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -20,6 +20,7 @@ const Header = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [notify, setNotify] = useState("");
+  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -102,6 +103,14 @@ const Header = () => {
     }, 250);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    showMsg("Logged out successfully");
+    navigate("/");
+  };
+
   const search = () => {
     const paid = localStorage.getItem("searchPaid");
 
@@ -162,6 +171,23 @@ const Header = () => {
 
   useEffect(() => {
     localStorage.removeItem("searchPaid");
+    
+    const checkAuth = () => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    checkAuth();
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
   }, []);
 
   return (
@@ -211,6 +237,23 @@ const Header = () => {
                   }
                 `}
               />
+            )}
+
+            {!user ? (
+              <User
+                onClick={() => navigate("/login")}
+                className="text-gray-700 hover:text-black cursor-pointer"
+                size={18}
+                title="Login"
+              />
+            ) : (
+              <button
+                onClick={handleLogout}
+                className="text-gray-700 hover:text-black text-xs sm:text-sm font-medium px-2 py-1 bg-gray-100 rounded-lg transition-colors hover:bg-gray-200"
+                title={`Logged in as ${user.name}`}
+              >
+                Logout
+              </button>
             )}
 
             <Search
