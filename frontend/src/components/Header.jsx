@@ -108,7 +108,7 @@ const Header = () => {
     localStorage.removeItem("user");
     setUser(null);
     showMsg("Logged out successfully");
-    navigate("/");
+    navigate("/login");
   };
 
   const search = () => {
@@ -249,7 +249,7 @@ const Header = () => {
             ) : (
               <button
                 onClick={handleLogout}
-                className="text-gray-700 hover:text-black text-xs sm:text-sm font-medium px-2 py-1 bg-gray-100 rounded-lg transition-colors hover:bg-gray-200"
+                className="text-gray-700 hover:text-black text-xs sm:text-sm font-medium px-2 py-1 bg-gray-100 rounded-lg transition-colors hover:bg-gray-200 cursor-pointer"
                 title={`Logged in as ${user.name}`}
               >
                 Logout
