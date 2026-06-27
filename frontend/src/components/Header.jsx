@@ -239,12 +239,22 @@ const Header = () => {
               />
             )}
 
-            <User
-              onClick={() => !user && navigate("/login")}
-              className={`text-gray-700 ${!user ? 'hover:text-black cursor-pointer' : ''}`}
-              size={18}
-              title={user ? `Logged in as ${user.name}` : "Login"}
-            />
+            {user?.profileImage ? (
+              <img
+                src={user.profileImage}
+                alt={user.name}
+                onClick={() => navigate("/profile")}
+                className="w-6 h-6 rounded-full object-cover cursor-pointer border border-gray-200"
+                title={`Logged in as ${user.name}`}
+              />
+            ) : (
+              <User
+                onClick={() => user ? navigate("/profile") : navigate("/login")}
+                className="text-gray-700 hover:text-black cursor-pointer"
+                size={18}
+                title={user ? `Logged in as ${user.name}` : "Login"}
+              />
+            )}
 
             <Search
               onClick={search}

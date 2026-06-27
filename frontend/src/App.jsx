@@ -8,6 +8,7 @@ import Saved from "./pages/saved/Saved";
 import Article from "./pages/article/[id]/Article";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import EditProfile from "./pages/auth/EditProfile";
 
 export default function App() {
   const ProtectedRoute = ({ children }) => {
@@ -35,6 +36,11 @@ export default function App() {
             <Route path="/article/:id" element={<Article />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            } />
           </Routes>
         </main>
         <Footer />
