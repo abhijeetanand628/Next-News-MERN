@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import axios from "axios";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -23,24 +24,13 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/users/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
+      const response = await axios.post("http://localhost:8000/api/v1/users/signup", formData);
+      const data = response.data;
 
       // Automatically redirect to login after successful signup
       navigate("/login", { state: { message: "Registration successful! Please login." } });
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || "Registration failed");
     } finally {
       setLoading(false);
     }
