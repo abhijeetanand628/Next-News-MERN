@@ -31,35 +31,22 @@ export const registerUser = async(req, res) => {
         // 4. Encrypt the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 5. Upload profile image to Cloudinary
-        const profileImagePath = req.files?.profileImage[0]?.path;
+        // 5. Upload profile image to Cloudinary (OPTIONAL)
+        const profileImagePath = req.files?.profileImage?.[0]?.path;
+        let profileImageUrl = "";
 
-        if(!profileImagePath)
-        {
-            return res
-            .status(400)
-            .json({
-                message: "Profile image is required"
-            })
+        if(profileImagePath) {
+            const profileImage = await uploadOnCloudinary(profileImagePath);
+            if(profileImage) {
+                profileImageUrl = profileImage.url;
+            }
         }
 
-        const profileImage = await uploadOnCloudinary(profileImagePath);
-
-        if(!profileImage)
-        {
-            return res
-            .status(400)
-            .json({
-                message: "Profile image is required"
-            })
-        }
-
-        // 6. Create the user
         const user = await User.create({
             name, 
             email,
             password: hashedPassword,
-            profileImage: profileImage.url
+            ...(profileImageUrl && { profileImage: profileImageUrl })
         })
 
         // 7. Send response

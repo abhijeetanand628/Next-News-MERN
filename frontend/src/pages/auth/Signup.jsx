@@ -12,6 +12,7 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -24,7 +25,19 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:8000/api/v1/users/signup", formData);
+      const dataToSend = new FormData();
+      dataToSend.append("name", formData.name);
+      dataToSend.append("email", formData.email);
+      dataToSend.append("password", formData.password);
+      if (profileImage) {
+        dataToSend.append("profileImage", profileImage);
+      }
+
+      const response = await axios.post("http://localhost:8000/api/v1/users/signup", dataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
       const data = response.data;
 
       // Automatically redirect to login after successful signup
@@ -107,6 +120,19 @@ export default function Signup() {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="profileImage">
+              Profile Picture <span className="text-gray-400 font-normal">(Optional)</span>
+            </label>
+            <input
+              type="file"
+              id="profileImage"
+              accept="image/*"
+              onChange={(e) => setProfileImage(e.target.files[0])}
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200/50 outline-none bg-gray-50/50 focus:bg-white focus:border-gray-300 focus:ring-2 focus:ring-gray-100 transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+            />
           </div>
 
           <button
