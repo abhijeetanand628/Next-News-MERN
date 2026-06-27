@@ -11,7 +11,8 @@ export const registerUser = async(req, res) => {
         // 2. Validate that none of them are empty
         if(!name || !email || !password)
         {
-            return res.status(400)
+            return res
+            .status(400)
             .json({
                 message: "All fields are required"
             })
@@ -22,7 +23,8 @@ export const registerUser = async(req, res) => {
 
         if(existingUser)
         {
-            return res.status(400)
+            return res
+            .status(400)
             .json({
                 message: "User with this email already exists"
             })
@@ -42,6 +44,7 @@ export const registerUser = async(req, res) => {
             }
         }
 
+        // 6. Create the user in DB
         const user = await User.create({
             name, 
             email,
@@ -50,7 +53,8 @@ export const registerUser = async(req, res) => {
         })
 
         // 7. Send response
-        return res.status(201)
+        return res
+        .status(201)
         .json({
           message: "User registered successfully",
           user 
@@ -58,7 +62,8 @@ export const registerUser = async(req, res) => {
 
     } catch (error) {
         console.log("Signup error : ", error);
-        res.status(500)
+        return res
+        .status(500)
         .json({
             message: "Server error"
         });
@@ -121,8 +126,7 @@ export const loginUser = async(req, res) => {
             user: {
                 _id: user._id,
                 name: user.name,
-                email: user.email,
-                
+                email: user.email
             }
         })
 
@@ -171,8 +175,10 @@ export const logoutUser = async(req, res) => {
 
 export const updatePassword = async(req, res) => {
     try {
+        // 1. Grab data from body
         const {oldPassword, newPassword, confirmPassword} = req.body;
-    
+
+        // 2. Validate data
         if(!oldPassword || !newPassword || !confirmPassword)
         {
             return res
@@ -181,7 +187,8 @@ export const updatePassword = async(req, res) => {
                 message: "All fields are required"
             })
         }
-    
+
+        // 3. Validate that newPassword and confirmPassword are same
         if(newPassword !== confirmPassword)
         {
             return res
@@ -191,17 +198,20 @@ export const updatePassword = async(req, res) => {
             })
         }
     
+        // 4. Validate that oldPassword and newPassword are not same
         if(oldPassword === newPassword)
         {
             return res
             .status(401)
             .json({
-                message: "Old password and new password are same"
+                message: "Old password and new password is same"
             })
         }
     
+        // 5. Fetch user from DB
         const user = await User.findById(req.user._id);
-    
+
+        // 6. Compare old Password
         const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
     
         if(!isPasswordCorrect)
@@ -213,17 +223,21 @@ export const updatePassword = async(req, res) => {
             })
         }
     
+        // 7. Hash the new Password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+        // 8. Update the user's password
         user.password = hashedPassword;
     
         await user.save({validateBeforeSave: false})
     
+        // 9. Send response
         return res
         .status(200)
         .json({
             message: "Password updated successfully"
         })
+        
     } catch (error) {
         console.log("Update password error : ", error);
         return res
@@ -237,8 +251,10 @@ export const updatePassword = async(req, res) => {
 
 export const updateAccountDetails = async(req, res) => {
     try {
+        // 1. Grab data from body
         const {name, email} = req.body;
     
+        // 2. Validate data
         if(!name || !email)
         {
             return res
@@ -248,6 +264,7 @@ export const updateAccountDetails = async(req, res) => {
             })
         }
     
+        // 3. Update the user in DB
         const user = await User.findByIdAndUpdate(
             req.user._id,
             {
@@ -261,12 +278,14 @@ export const updateAccountDetails = async(req, res) => {
             }
         ).select("-password")
     
-        return res
+        // 4. Send response
+        return res  
         .status(200)
         .json({
             message: "Account details updated successfully",
             user
         })
+        
     } catch (error) {
         console.log("Update account details error : ", error);
         return res
