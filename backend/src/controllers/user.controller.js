@@ -1,11 +1,12 @@
 import {User} from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 export const registerUser = async(req, res) => {
     try {
         // 1. Grab data from body
-        const {name, email, password, profileImage} = req.body;
+        const {name, email, password} = req.body;
         
         // 2. Validate that none of them are empty
         if(!name || !email || !password)
@@ -30,15 +31,38 @@ export const registerUser = async(req, res) => {
         // 4. Encrypt the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 5. Create the user
+        // 5. Upload profile image to Cloudinary
+        const profileImagePath = req.files?.profileImage[0]?.path;
+
+        if(!profileImagePath)
+        {
+            return res
+            .status(400)
+            .json({
+                message: "Profile image is required"
+            })
+        }
+
+        const profileImage = await uploadOnCloudinary(profileImagePath);
+
+        if(!profileImage)
+        {
+            return res
+            .status(400)
+            .json({
+                message: "Profile image is required"
+            })
+        }
+
+        // 6. Create the user
         const user = await User.create({
             name, 
             email,
             password: hashedPassword,
-            profileImage
+            profileImage: profileImage.url
         })
 
-        // 6. Send response
+        // 7. Send response
         return res.status(201)
         .json({
           message: "User registered successfully",
@@ -191,7 +215,7 @@ export const updatePassword = async(req, res) => {
     
         const user = await User.findById(req.user._id);
     
-        const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+        const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
     
         if(!isPasswordCorrect)
         {
@@ -202,7 +226,9 @@ export const updatePassword = async(req, res) => {
             })
         }
     
-        user.password = newPassword;
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashedPassword;
     
         await user.save({validateBeforeSave: false})
     
@@ -240,7 +266,7 @@ export const updateAccountDetails = async(req, res) => {
             {
                 $set: {
                     name: name,
-                    email: email.toLowercase()
+                    email: email.toLowerCase()
                 }
             },
             {
@@ -266,8 +292,55 @@ export const updateAccountDetails = async(req, res) => {
 
 
 export const updateProfileImg = async(req, res) => {
-    const {profileImage} = req.body;
-
+    try {
+        // req.file is provided by our Multer middleware!
+        const profileImglFilePath = req.file?.path;
     
-
+        if(!profileImglFilePath) 
+        {
+            return res
+            .status(400)
+            .json({
+                message: "Profile image is missing"
+            })
+        }
+    
+        // upload on cloudinary
+        const profileImage = await uploadOnCloudinary(profileImglFilePath);
+    
+        if(!profileImage) {
+            return res
+            .status(500)
+            .json({
+                message: "Error while uploading image on cloudinary"
+            })
+        }
+    
+        // Update user with new image
+        const user = await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $set: {
+                    profileImage: profileImage.url
+                }
+            },
+            {
+                returnDocument: "after"
+            }
+        ).select("-password");
+    
+        return res
+        .status(200)
+        .json({
+            message: "Profile image updated successfully",
+            user
+        })
+    } catch (error) {
+        console.log("Update profile image error : ", error);
+        return res
+        .status(500)
+        .json({
+            message: "Server error"
+        })
+    }
 }
