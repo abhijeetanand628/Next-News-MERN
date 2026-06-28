@@ -24,7 +24,7 @@ const articleSchema = new Schema({
         required: true,
         enum: ['Technology', 'Sports', 'Entertainment', 'Health', 'Business', 'General', 'Gaming'],
     },
-    imageUrl: {
+    articleImage: {
         type: String,
         required: true,
     },

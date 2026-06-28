@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./src/db/index.js";
 import userRoutes from "./src/routes/user.routes.js";
-
+import articleRoutes from "./src/routes/article.route.js";
 
 const app = express();
 
@@ -22,6 +22,7 @@ app.use(express.static("public"));
 
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/articles", articleRoutes);
 
 
 
