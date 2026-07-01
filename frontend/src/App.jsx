@@ -28,14 +28,18 @@ export default function App() {
         <Header />
         <main className="flex-1">
           <Routes>
-            <Route path="/" element={
+            <Route path="/" element={<Home />} />
+            <Route path="/category/:slug" element={<Category />} />
+            <Route path="/community" element={
               <ProtectedRoute>
-                <Home />
+                <Community />
               </ProtectedRoute>
             } />
-            <Route path="/category/:slug" element={<Category />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/post/:id" element={<CommunityPost />} />
+            <Route path="/post/:id" element={
+              <ProtectedRoute>
+                <CommunityPost />
+              </ProtectedRoute>
+            } />
             <Route path="/write" element={
               <ProtectedRoute>
                 <WritePost />
