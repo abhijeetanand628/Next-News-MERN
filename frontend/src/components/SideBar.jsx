@@ -87,21 +87,7 @@ const SideBar = ({
               Saved Articles
             </li>
 
-            {user && (
-              <>
-                <div className="h-px bg-gray-200 my-2" />
-                <li
-                  onClick={() => {
-                    onLogout();
-                    onClose();
-                  }}
-                  className="cursor-pointer px-3 py-2 rounded hover:bg-red-50 hover:text-red-600 flex items-center gap-2 text-gray-700 transition-colors"
-                >
-                  <LogOut size={18} />
-                  Logout
-                </li>
-              </>
-            )}
+
           </ul>
         </nav>
       </div>

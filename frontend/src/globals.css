@@ -20,3 +20,7 @@ body {
 .animate-fade-in {
   animation: fade-in 0.25s ease-out;
 }
+
+button, a, select, [role="button"], input[type="file"], input[type="file"]::file-selector-button {
+  cursor: pointer;
+}

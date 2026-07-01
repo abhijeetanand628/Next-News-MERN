@@ -18,7 +18,6 @@ export default function EditPost() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
-
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -119,8 +118,21 @@ export default function EditPost() {
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-lg border border-red-100 text-sm">
-            {error}
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+            <div className="bg-white p-8 rounded-2xl border border-red-100 shadow-2xl flex flex-col items-center gap-3 min-w-[320px] max-w-md text-center">
+              <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-2 border border-red-100">
+                <span className="text-red-500 text-2xl">⚠️</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Oops!</h3>
+              <p className="text-red-600 font-medium">{error}</p>
+              <button 
+                onClick={() => setError("")}
+                type="button"
+                className="mt-4 px-8 py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-colors text-sm font-bold cursor-pointer w-full border border-red-100"
+              >
+                Dismiss
+              </button>
+            </div>
           </div>
         )}
 

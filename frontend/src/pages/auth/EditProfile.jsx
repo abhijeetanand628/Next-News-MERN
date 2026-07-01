@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Camera, Save, Lock, User, FileText, Edit, Eye } from "lucide-react";
+import { Camera, Save, Lock, User, FileText, Edit, Eye, LogOut } from "lucide-react";
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -152,6 +152,13 @@ export default function EditProfile() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/login");
+  };
+
   if (!user) return null;
 
   return (
@@ -190,6 +197,14 @@ export default function EditProfile() {
           >
             <FileText size={18} />
             <span className="font-medium">My Posts</span>
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 mt-8 rounded-xl transition-all duration-300 hover:bg-red-50 text-red-500 hover:text-red-600"
+          >
+            <LogOut size={18} />
+            <span className="font-medium">Logout</span>
           </button>
         </div>
 

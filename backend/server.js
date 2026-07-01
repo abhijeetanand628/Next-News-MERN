@@ -1,5 +1,5 @@
+import "dotenv/config";
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./src/db/index.js";
 import userRoutes from "./src/routes/user.routes.js";
@@ -8,7 +8,6 @@ import commentRoutes from "./src/routes/comment.route.js";
 
 const app = express();
 
-dotenv.config();
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
