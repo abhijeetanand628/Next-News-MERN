@@ -139,6 +139,44 @@ export const getArticleById = async(req, res) => {
 }
 
 
+export const getMyArticles = async(req, res) => {
+    try {
+        // 1. Grab data
+        const userId = req.user._id;
+
+        // 2. Validate
+        if(!userId)
+        {
+            return res
+            .status(400)
+            .json({
+                message: "User ID not found"
+            })
+        }
+
+        // 3. Fetch articles written by the user
+        const articles = await Article.find({author: userId}).sort({ createdAt: -1 });
+
+        // 4. Send Response
+        return res
+        .status(200)
+        .json({
+            success: true,
+            message: "My articles fetched successfully",
+            articles
+        })
+
+    } catch (error) {
+        console.log("Error in fetching my articles : ", error);
+        return res
+        .status(500)
+        .json({
+            message: "Server error"
+        })
+    }
+}
+
+
 export const updateArticle = async(req, res) => {
     try {
         // 1. Grab data

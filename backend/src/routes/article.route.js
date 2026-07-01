@@ -6,7 +6,8 @@ import {
     getArticleById,
     likeArticle,
     deleteArticle,
-    updateArticle
+    updateArticle,
+    getMyArticles
 } from "../controllers/article.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -35,5 +36,6 @@ router.patch("/article/:articleId/update", verifyJWT,
 )
 router.delete("/article/:articleId/delete", verifyJWT, deleteArticle)
 router.post("/article/:articleId/like", verifyJWT, likeArticle)
+router.get("/my-articles", verifyJWT, getMyArticles)
 
 export default router;
