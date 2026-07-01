@@ -21,6 +21,8 @@ export default function CommunityPost() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -91,6 +93,37 @@ export default function CommunityPost() {
     } catch (err) {
       console.error(err);
       alert("Failed to delete post");
+    }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim() || !user) return;
+
+    setSubmittingComment(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `http://localhost:8000/api/v1/comments/new-comment/${id}`,
+        { content: newComment },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      
+      // Populate owner immediately for UI rendering
+      const commentToAdd = {
+        ...res.data.comment,
+        owner: { _id: user._id, name: user.name, profileImage: user.profileImage }
+      };
+
+      setComments([commentToAdd, ...comments]);
+      setNewComment("");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add comment");
+    } finally {
+      setSubmittingComment(false);
     }
   };
 
@@ -202,6 +235,46 @@ export default function CommunityPost() {
           <h2 className="text-2xl font-bold text-gray-900 mb-8">
             Discussion ({comments.length})
           </h2>
+
+          {user ? (
+            <form onSubmit={handleAddComment} className="mb-10 flex gap-4">
+              <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
+                {user.profileImage ? (
+                  <img src={user.profileImage} alt="User" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center font-bold text-gray-400">
+                    {user.name ? user.name[0].toUpperCase() : "U"}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Share your thoughts..."
+                  className="w-full border border-gray-200 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all"
+                  rows={3}
+                  required
+                />
+                <div className="flex justify-end mt-2">
+                  <button
+                    type="submit"
+                    disabled={submittingComment || !newComment.trim()}
+                    className="px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    {submittingComment ? "Posting..." : "Post Comment"}
+                  </button>
+                </div>
+              </div>
+            </form>
+          ) : (
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center mb-10">
+              <p className="text-gray-600 mb-3">Join the discussion to share your thoughts!</p>
+              <Link to="/login" className="inline-block px-6 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                Log In or Sign Up
+              </Link>
+            </div>
+          )}
 
           <div className="space-y-6">
             {comments.length === 0 ? (
