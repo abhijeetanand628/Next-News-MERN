@@ -20,7 +20,7 @@ export default function CommunityPost() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [comments, setComments] = useState([]);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -35,10 +35,15 @@ export default function CommunityPost() {
   }, []);
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchPostAndComments = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/v1/articles/article/${id}`);
-        setPost(response.data.article);
+        const [postRes, commentsRes] = await Promise.all([
+          axios.get(`http://localhost:8000/api/v1/articles/article/${id}`),
+          axios.get(`http://localhost:8000/api/v1/comments/all-comments/${id}`)
+        ]);
+        
+        setPost(postRes.data.article);
+        setComments(commentsRes.data.comments || []);
       } catch (err) {
         console.error(err);
         setError("Article not found.");
@@ -46,7 +51,7 @@ export default function CommunityPost() {
         setLoading(false);
       }
     };
-    fetchPost();
+    fetchPostAndComments();
   }, [id]);
 
   const handleLike = async () => {
