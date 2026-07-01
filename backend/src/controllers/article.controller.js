@@ -1,5 +1,5 @@
 import { Article } from "../models/article.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 
 export const createNewArticle = async(req, res) => {
     try {
@@ -13,6 +13,16 @@ export const createNewArticle = async(req, res) => {
             .status(400)
             .json({
                 message: "All fields are required"
+            })
+        }
+
+        const allowedCategories = ['Technology', 'Sports', 'Entertainment', 'Health', 'Business', 'General', 'Gaming'];
+        if(!allowedCategories.includes(category))
+        {
+            return res
+            .status(400)
+            .json({
+                message: "Invalid category"
             })
         }
 
@@ -229,13 +239,22 @@ export const updateArticle = async(req, res) => {
                     message: "Article image upload failed"
                 })
             }
-
+            deleteFromCloudinary(article.articleImage);
             articleImage = uploadedImage.url;
         }
 
         // 6. Update fields
         const {title, description, content, category} = req.body;
         
+        if (category) {
+            const allowedCategories = ['Technology', 'Sports', 'Entertainment', 'Health', 'Business', 'General', 'Gaming'];
+            if (!allowedCategories.includes(category)) {
+                return res.status(400).json({
+                    message: "Invalid category"
+                });
+            }
+        }
+
         const updatedArticle = await Article.findByIdAndUpdate(articleId, {
             $set: {
                 title: title,
@@ -283,7 +302,7 @@ export const deleteArticle = async(req, res) => {
         // 3. Check if it exists
         const article = await Article.findById(articleId);
 
-        if(!articleId)
+        if(!article)
         {
             return res
             .status(404)
@@ -302,13 +321,17 @@ export const deleteArticle = async(req, res) => {
             })
         }
 
-        // 5. Delete article
+        // 5. Delete article image from cloudnary
+        deleteFromCloudinary(article.articleImage);
+        
+        // 6. Delete article from DB
         await Article.findByIdAndDelete(articleId);
 
-        // 6. Send response
+        // 7. Send response
         return res
         .status(200)
         .json({
+            success: true,
             message: "Article deleted successfully"
         })
     
@@ -317,6 +340,7 @@ export const deleteArticle = async(req, res) => {
         return res
         .status(500)
         .json({
+            success: false,
             message: "Server error"
         })
     }
