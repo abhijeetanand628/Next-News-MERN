@@ -127,6 +127,23 @@ export default function CommunityPost() {
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this comment?");
+    if (!confirmDelete) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:8000/api/v1/comments/delete-comment/${commentId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setComments(comments.filter(c => c._id !== commentId));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete comment");
+    }
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -233,7 +250,7 @@ export default function CommunityPost() {
         {/* Comments Section */}
         <div className="mt-16 border-t border-gray-100 pt-10">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">
-            Discussion ({comments.length})
+            Comments ({comments.length})
           </h2>
 
           {user ? (
@@ -298,6 +315,15 @@ export default function CommunityPost() {
                         <span className="font-semibold text-gray-900 mr-2">{comment.owner?.name || "Unknown User"}</span>
                         <span className="text-xs text-gray-500">{timeAgo(comment.createdAt)}</span>
                       </div>
+                      {user && comment.owner && user._id === comment.owner._id && (
+                        <button
+                          onClick={() => handleDeleteComment(comment._id)}
+                          className=" px-3 py-1 text-white bg-red-500 hover:bg-red-600 transition-color border border-red-200 rounded text-xs font-medium cursor-pointer"
+                          title="Delete Comment"
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                     <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
                   </div>
