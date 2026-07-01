@@ -23,6 +23,8 @@ export default function CommunityPost() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentContent, setEditCommentContent] = useState("");
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -141,6 +143,28 @@ export default function CommunityPost() {
     } catch (err) {
       console.error(err);
       alert("Failed to delete comment");
+    }
+  };
+
+  const handleEditCommentSubmit = async (commentId) => {
+    if (!editCommentContent.trim()) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch(`http://localhost:8000/api/v1/comments/update-comment/${commentId}`, 
+        { content: editCommentContent },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setComments(comments.map(c => 
+        c._id === commentId ? { ...c, content: editCommentContent } : c
+      ));
+      
+      setEditingCommentId(null);
+      setEditCommentContent("");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update comment");
     }
   };
 
@@ -316,16 +340,58 @@ export default function CommunityPost() {
                         <span className="text-xs text-gray-500">{timeAgo(comment.createdAt)}</span>
                       </div>
                       {user && comment.owner && user._id === comment.owner._id && (
-                        <button
-                          onClick={() => handleDeleteComment(comment._id)}
-                          className=" px-3 py-1 text-white bg-red-500 hover:bg-red-600 transition-color border border-red-200 rounded text-xs font-medium cursor-pointer"
-                          title="Delete Comment"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingCommentId(comment._id);
+                              setEditCommentContent(comment.content);
+                            }}
+                            className="px-3 py-1 text-gray-700 bg-white hover:bg-gray-100 transition-colors border border-gray-300 rounded text-xs font-medium cursor-pointer"
+                            title="Edit Comment"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteComment(comment._id)}
+                            className="px-3 py-1 text-white bg-red-500 hover:bg-red-600 transition-color border border-red-200 rounded text-xs font-medium cursor-pointer"
+                            title="Delete Comment"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       )}
                     </div>
-                    <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                    
+                    {editingCommentId === comment._id ? (
+                      <div className="mt-2">
+                        <textarea
+                          value={editCommentContent}
+                          onChange={(e) => setEditCommentContent(e.target.value)}
+                          className="w-full border border-gray-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all text-sm"
+                          rows={2}
+                        />
+                        <div className="flex justify-end gap-2 mt-2">
+                          <button
+                            onClick={() => {
+                              setEditingCommentId(null);
+                              setEditCommentContent("");
+                            }}
+                            className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-300 transition-colors cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleEditCommentSubmit(comment._id)}
+                            disabled={!editCommentContent.trim()}
+                            className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                    )}
                   </div>
                 </div>
               ))
