@@ -196,6 +196,43 @@ export default function CommunityPost() {
             </button>
           </div>
         )}
+
+        {/* Comments Section */}
+        <div className="mt-16 border-t border-gray-100 pt-10">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">
+            Discussion ({comments.length})
+          </h2>
+
+          <div className="space-y-6">
+            {comments.length === 0 ? (
+              <p className="text-gray-500 italic">No comments yet. Be the first to share your thoughts!</p>
+            ) : (
+              comments.map((comment) => (
+                <div key={comment._id} className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-200">
+                    {comment.owner?.profileImage ? (
+                      <img src={comment.owner.profileImage} alt="User" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="font-bold text-gray-400">
+                        {comment.owner?.name ? comment.owner.name[0].toUpperCase() : "U"}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 bg-gray-50 rounded-2xl rounded-tl-none p-4 border border-gray-100">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <span className="font-semibold text-gray-900 mr-2">{comment.owner?.name || "Unknown User"}</span>
+                        <span className="text-xs text-gray-500">{timeAgo(comment.createdAt)}</span>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );
