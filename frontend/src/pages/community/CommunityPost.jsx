@@ -257,7 +257,7 @@ export default function CommunityPost() {
         {isAuthor && (
           <div className="mt-12 pt-6 border-t border-gray-100 flex justify-end gap-3">
             <button 
-              onClick={() => alert("Edit functionality coming soon!")}
+              onClick={() => navigate(`/edit-post/${id}`)}
               className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors text-sm cursor-pointer"
             >
               Edit Post

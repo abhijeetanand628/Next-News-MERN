@@ -3,13 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const categories = [
-  "technology",
-  "general",
-  "gaming",
-  "health",
-  "business",
-  "sports",
-  "entertainment",
+  "Technology",
+  "General",
+  "Gaming",
+  "Health",
+  "Business",
+  "Sports",
+  "Entertainment",
 ];
 
 export default function EditPost() {
@@ -75,9 +75,31 @@ export default function EditPost() {
     setLoading(true);
     setError("");
 
-    // TODO: We will implement this in Step 2!
-    alert("Submit logic coming in step 2!");
-    setLoading(false);
+    try {
+      const token = localStorage.getItem("token");
+      const data = new FormData();
+      data.append("title", formData.title);
+      data.append("description", formData.description);
+      data.append("content", formData.content);
+      data.append("category", formData.category);
+      if (formData.articleImage) {
+        data.append("articleImage", formData.articleImage);
+      }
+
+      await axios.patch(`http://localhost:8000/api/v1/articles/article/${id}/update`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      navigate(`/post/${id}`);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to update post. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (initialLoading) {

@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const categories = [
-  "technology",
-  "general",
-  "gaming",
-  "health",
-  "business",
-  "sports",
-  "entertainment",
+  "Technology",
+  "General",
+  "Gaming",
+  "Health",
+  "Business",
+  "Sports",
+  "Entertainment",
 ];
 
 export default function WritePost() {

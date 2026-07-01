@@ -12,6 +12,7 @@ import EditProfile from "./pages/auth/EditProfile";
 import Community from "./pages/community/Community";
 import CommunityPost from "./pages/community/CommunityPost";
 import WritePost from "./pages/community/WritePost";
+import EditPost from "./pages/community/EditPost";
 
 export default function App() {
   const ProtectedRoute = ({ children }) => {
@@ -43,6 +44,11 @@ export default function App() {
             <Route path="/write" element={
               <ProtectedRoute>
                 <WritePost />
+              </ProtectedRoute>
+            } />
+            <Route path="/edit-post/:id" element={
+              <ProtectedRoute>
+                <EditPost />
               </ProtectedRoute>
             } />
             <Route path="/search" element={<Search />} />

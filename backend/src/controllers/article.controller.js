@@ -109,7 +109,7 @@ export const getArticleById = async(req, res) => {
         }
 
         // 3. Fetch article
-        const article = await Article.findById(articleId);
+        const article = await Article.findById(articleId).populate("author", "name profileImage");
 
         if(!article)
         {
