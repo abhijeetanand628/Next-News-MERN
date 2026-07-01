@@ -166,7 +166,7 @@ export const updateArticle = async(req, res) => {
         }
 
         // 4. Check if user is author
-        if(article.author !== req.user._id)
+        if(article.author.toString() !== req.user._id.toString())
         {
             return res
             .status(401)
@@ -255,7 +255,7 @@ export const deleteArticle = async(req, res) => {
         }
 
         // 4.Check if user is author
-        if(article.author !== req.user._id)
+        if(article.author.toString() !== req.user._id.toString())
         {
             return res
             .status(401)

@@ -214,12 +214,29 @@ const Header = () => {
 
       <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-md">
         <div className="flex items-center justify-between px-4 sm:px-6 md:px-12 lg:px-20 py-4">
-          <h1
-            onClick={goHomeSmooth}
-            className="cursor-pointer text-gray-700 hover:text-black text-lg sm:text-xl md:text-xl"
-          >
-            NextNews
-          </h1>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <h1
+              onClick={goHomeSmooth}
+              className={`cursor-pointer transition-colors ${
+                pathname.startsWith("/community") || pathname.startsWith("/post") || pathname === "/write"
+                  ? "text-gray-400 hover:text-gray-600 text-sm sm:text-base font-medium" 
+                  : "text-gray-800 hover:text-black text-lg sm:text-xl md:text-xl font-bold"
+              }`}
+            >
+              NextNews
+            </h1>
+            {/* <span className="text-gray-300 text-lg sm:text-xl font-light">/</span> */}
+            <span 
+              onClick={() => navigate("/community")}
+              className={`cursor-pointer transition-colors ${
+                pathname.startsWith("/community") || pathname.startsWith("/post") || pathname === "/write"
+                  ? "text-gray-800 hover:text-black text-lg sm:text-xl md:text-xl font-bold" 
+                  : "text-gray-400 hover:text-gray-600 text-sm sm:text-base font-medium hidden sm:block"
+              }`}
+            >
+              Community
+            </span>
+          </div>
 
           <div className="flex items-center gap-6 relative">
             {showSearch && (

@@ -9,6 +9,9 @@ import Article from "./pages/article/[id]/Article";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import EditProfile from "./pages/auth/EditProfile";
+import Community from "./pages/community/Community";
+import CommunityPost from "./pages/community/CommunityPost";
+import WritePost from "./pages/community/WritePost";
 
 export default function App() {
   const ProtectedRoute = ({ children }) => {
@@ -31,6 +34,13 @@ export default function App() {
               </ProtectedRoute>
             } />
             <Route path="/category/:slug" element={<Category />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/post/:id" element={<CommunityPost />} />
+            <Route path="/write" element={
+              <ProtectedRoute>
+                <WritePost />
+              </ProtectedRoute>
+            } />
             <Route path="/search" element={<Search />} />
             <Route path="/saved" element={<Saved />} />
             <Route path="/article/:id" element={<Article />} />
