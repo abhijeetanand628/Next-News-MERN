@@ -35,53 +35,7 @@ const Header = () => {
     setTimeout(() => setNotify(""), 3000);
   };
 
-  const payForSearch = async () => {
-    try {
-      // NOTE: Calling Razorpay orders API from frontend might cause CORS issues in production. 
-      // This is a known limitation of having no backend.
-      const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
-      const keySecret = import.meta.env.VITE_RAZORPAY_KEY_SECRET;
-      
-      const response = await fetch("https://api.razorpay.com/v1/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Basic " + btoa(keyId + ":" + keySecret)
-        },
-        body: JSON.stringify({ amount: 9900, currency: "INR", receipt: "receipt_" + Date.now() }),
-      });
 
-      const order = await response.json();
-
-      const options = {
-        key: keyId,
-        amount: order.amount,
-        currency: "INR",
-        name: "NextNews Premium Search",
-        description: "Unlock search functionality",
-        order_id: order.id,
-
-        handler: async function (response) {
-          // Verify payment directly (dummy since no backend)
-          if (response.razorpay_payment_id) {
-            localStorage.setItem("searchPaid", "true");
-            showMsg("Payment successful! Search unlocked.");
-            setShowSearch(true);
-          } else {
-            showMsg("Payment verification failed!");
-          }
-        },
-
-        theme: { color: "#4f46e5" },
-      };
-
-      const razorPay = new window.Razorpay(options);
-      razorPay.open();
-    } catch (error) {
-      console.error("Payment Error", error);
-      showMsg("Something went wrong!");
-    }
-  };
 
   const goHomeSmooth = () => {
     if (pathname === "/") {
@@ -112,14 +66,6 @@ const Header = () => {
   };
 
   const search = () => {
-    const paid = localStorage.getItem("searchPaid");
-
-    // if user hasn’t paid, open payment popup
-    if (!paid) {
-      payForSearch();
-      return;
-    }
-
     if (showSearch) {
       runSearch();
     } else {
@@ -128,13 +74,6 @@ const Header = () => {
   };
 
   const runSearch = () => {
-    const paid = localStorage.getItem("searchPaid");
-
-    if (!paid) {
-      payForSearch();
-      return;
-    }
-
     if (!searchValue.trim()) return;
 
     navigate(`/search?query=${encodeURIComponent(searchValue.trim())}`);
@@ -168,8 +107,6 @@ const Header = () => {
   }, [urlCategory, pathname]);
 
   useEffect(() => {
-    localStorage.removeItem("searchPaid");
-    
     const checkAuth = () => {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
