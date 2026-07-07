@@ -48,6 +48,12 @@ const articleSchema = new Schema({
             ref: "Comment"
         }
     ],
+    savedBy: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ]
 }, {timestamps: true})
 
 
