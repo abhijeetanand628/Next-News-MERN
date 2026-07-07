@@ -60,6 +60,8 @@ export default function EditProfile() {
   useEffect(() => {
     if (activeTab === "posts") {
       fetchMyPosts();
+    } else if (activeTab === "liked") {
+      fetchLikedPosts();
     }
   }, [activeTab]);
 
@@ -74,6 +76,20 @@ export default function EditProfile() {
       showMsg("Failed to load your posts", true);
     } finally {
       setLoadingPosts(false);
+    }
+  };
+
+  const fetchLikedPosts = async () => {
+    setLoadingLiked(true);
+    try {
+      const response = await axios.get("http://localhost:8000/api/v1/articles/liked-articles", {
+        headers: getAuthHeaders()
+      });
+      setLikedPosts(response.data.articles || []);
+    } catch (err) {
+      showMsg("Failed to load liked posts", true);
+    } finally {
+      setLoadingLiked(false);
     }
   };
 
@@ -453,10 +469,51 @@ export default function EditProfile() {
               <div className="flex justify-between items-center mb-6 border-b pb-4">
                 <h3 className="text-xl font-semibold text-gray-900">Liked Posts</h3>
               </div>
-              <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
-                <Heart className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                <p className="text-gray-500 font-medium">Coming up next...</p>
-              </div>
+              
+              {loadingLiked ? (
+                <div className="flex justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+              ) : likedPosts.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
+                  <Heart className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <p className="text-gray-500 font-medium">You haven't liked any posts yet.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {likedPosts.map((post) => (
+                    <div key={post._id} className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col">
+                      <div className="h-40 overflow-hidden relative">
+                        <img 
+                          src={post.articleImage} 
+                          alt={post.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-blue-600 uppercase tracking-wider">
+                          {post.category}
+                        </div>
+                      </div>
+                      <div className="p-5 flex flex-col flex-1">
+                        <h4 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">{post.title}</h4>
+                        
+                        <div className="flex items-center gap-4 text-xs font-medium text-gray-500 mb-4 mt-auto">
+                          <span className="flex items-center gap-1 font-semibold text-gray-700">✍️ {post.author?.name || "Unknown"}</span>
+                          <span className="flex items-center gap-1">❤️ {post.likes?.length || 0}</span>
+                        </div>
+                        
+                        <div className="flex gap-2 pt-4 border-t border-gray-100">
+                          <button 
+                            onClick={() => navigate(`/post/${post._id}`)}
+                            className="flex-1 flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            <Eye size={16} /> Read Article
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           
