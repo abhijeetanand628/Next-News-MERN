@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Camera, Save, Lock, User, FileText, Edit, Eye, LogOut } from "lucide-react";
+import { Camera, Save, Lock, User, FileText, Edit, Eye, LogOut, Heart, Trash2, BarChart2 } from "lucide-react";
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -25,6 +25,11 @@ export default function EditProfile() {
   // My Posts State
   const [myPosts, setMyPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+
+  // New States
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [loadingLiked, setLoadingLiked] = useState(false);
+  const [userStats, setUserStats] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -197,6 +202,16 @@ export default function EditProfile() {
           >
             <FileText size={18} />
             <span className="font-medium">My Posts</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("liked")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+              activeTab === "liked" ? "bg-black text-white" : "hover:bg-gray-100 text-gray-600 hover:text-black"
+            }`}
+          >
+            <Heart size={18} />
+            <span className="font-medium">Liked Posts</span>
           </button>
 
           <button
@@ -430,6 +445,18 @@ export default function EditProfile() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === "liked" && (
+            <div className="mt-8 animate-fade-in">
+              <div className="flex justify-between items-center mb-6 border-b pb-4">
+                <h3 className="text-xl font-semibold text-gray-900">Liked Posts</h3>
+              </div>
+              <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
+                <Heart className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                <p className="text-gray-500 font-medium">Coming up next...</p>
+              </div>
             </div>
           )}
           
