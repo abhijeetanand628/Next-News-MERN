@@ -17,56 +17,8 @@ export default function Article() {
     );
   }
 
-  const originalSource = useCallback(async (articleUrl) => {
-    const paid = sessionStorage.getItem("articlePaid");
-
-    if (paid) {
-      window.open(articleUrl, "_blank");
-      return;
-    }
-
-    try {
-      const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
-      const keySecret = import.meta.env.VITE_RAZORPAY_KEY_SECRET;
-      
-      const response = await fetch("https://api.razorpay.com/v1/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Basic " + btoa(keyId + ":" + keySecret)
-        },
-        body: JSON.stringify({ amount: 29900, currency: "INR", receipt: "receipt_article_" + Date.now() }),
-      });
-
-      const order = await response.json();
-
-      const options = {
-        key: keyId,
-        amount: order.amount,
-        currency: "INR",
-        name: "NextNews Premium Access",
-        description: "Unlock full article source",
-        order_id: order.id,
-
-        handler: async function (response) {
-          // Verify payment directly (dummy since no backend)
-          if (response.razorpay_payment_id) {
-            sessionStorage.setItem("articlePaid", "true");
-            window.open(articleUrl, "_blank");
-          } else {
-            alert("Payment verification failed!");
-          }
-        },
-
-        theme: { color: "#4f46e5" },
-      };
-
-      const razorPay = new window.Razorpay(options);
-      razorPay.open();
-    } catch (error) {
-      console.error("Payment Error", error);
-      alert("Something went wrong!");
-    }
+  const originalSource = useCallback((articleUrl) => {
+    window.open(articleUrl, "_blank");
   }, []);
 
   return (

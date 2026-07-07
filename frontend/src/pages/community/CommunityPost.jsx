@@ -27,6 +27,18 @@ export default function CommunityPost() {
   const [editCommentContent, setEditCommentContent] = useState("");
   const [user, setUser] = useState(null);
 
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastType, setToastType] = useState("success");
+  
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const showToast = (msg, type = "success") => {
+    setToastMsg(msg);
+    setToastType(type);
+    setTimeout(() => setToastMsg(""), 3000);
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -60,7 +72,7 @@ export default function CommunityPost() {
 
   const handleLike = async () => {
     if (!user) {
-      alert("Please login to like this post");
+      showToast("Please login to like this post", "error");
       return;
     }
     
@@ -75,27 +87,45 @@ export default function CommunityPost() {
       setPost(res.data.article);
     } catch (err) {
       console.error(err);
-      alert("Failed to like post");
+      showToast("Failed to like post", "error");
     }
   };
 
-  const handleDelete = async () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this post?");
-    if (!confirmDelete) return;
+  const confirmDeleteAction = async () => {
+    if (!deleteTarget) return;
 
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:8000/api/v1/articles/article/${id}/delete`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      alert("Post deleted successfully");
-      navigate("/community");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete post");
+    if (deleteTarget.type === 'post') {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.delete(`http://localhost:8000/api/v1/articles/article/${id}/delete`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        showToast("Post deleted successfully", "success");
+        setTimeout(() => navigate("/community"), 1000);
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to delete post", "error");
+      }
+    } else if (deleteTarget.type === 'comment') {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.delete(`http://localhost:8000/api/v1/comments/delete-comment/${deleteTarget.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setComments(comments.filter(c => c._id !== deleteTarget.id));
+        showToast("Comment deleted", "success");
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to delete comment", "error");
+      }
     }
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+  };
+
+  const handleDelete = () => {
+    setDeleteTarget({ type: 'post', id });
+    setShowDeleteModal(true);
   };
 
   const handleAddComment = async (e) => {
@@ -121,29 +151,18 @@ export default function CommunityPost() {
 
       setComments([commentToAdd, ...comments]);
       setNewComment("");
+      showToast("Comment added", "success");
     } catch (err) {
       console.error(err);
-      alert("Failed to add comment");
+      showToast("Failed to add comment", "error");
     } finally {
       setSubmittingComment(false);
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this comment?");
-    if (!confirmDelete) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:8000/api/v1/comments/delete-comment/${commentId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      setComments(comments.filter(c => c._id !== commentId));
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete comment");
-    }
+  const handleDeleteComment = (commentId) => {
+    setDeleteTarget({ type: 'comment', id: commentId });
+    setShowDeleteModal(true);
   };
 
   const handleEditCommentSubmit = async (commentId) => {
@@ -162,9 +181,10 @@ export default function CommunityPost() {
       
       setEditingCommentId(null);
       setEditCommentContent("");
+      showToast("Comment updated", "success");
     } catch (err) {
       console.error(err);
-      alert("Failed to update comment");
+      showToast("Failed to update comment", "error");
     }
   };
 
@@ -189,7 +209,45 @@ export default function CommunityPost() {
   const hasLiked = user && post.likes?.includes(user._id);
 
   return (
-    <main className="bg-gray-50 min-h-screen text-gray-900 py-12 px-6 sm:px-12">
+    <main className="bg-gray-50 min-h-screen text-gray-900 py-12 px-6 sm:px-12 relative">
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-fade-in">
+          <div className={`px-6 py-3 rounded-full shadow-lg font-medium text-sm text-white ${toastType === 'error' ? 'bg-red-500' : 'bg-green-500'}`}>
+            {toastMsg}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-sm p-6 text-center">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Are you sure?</h3>
+            <p className="text-gray-500 mb-6">
+              This action cannot be undone. This {deleteTarget?.type} will be permanently deleted.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button 
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteTarget(null);
+                }}
+                className="px-5 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteAction}
+                className="px-5 py-2.5 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 transition-colors cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-sm border border-gray-100">
         <button
           onClick={() => navigate("/community")}

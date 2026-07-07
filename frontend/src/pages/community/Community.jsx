@@ -17,22 +17,34 @@ function timeAgo(dateString) {
 export default function Community() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const response = await axios.get("http://localhost:8000/api/v1/articles/all-articles");
-        // Accessing the 'articles' array from our JSON response
-        setArticles(response.data.articles || []);
-      } catch (error) {
-        console.error("Error fetching community articles:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
+    fetchArticles(1);
   }, []);
+
+  const fetchArticles = async (pageNum) => {
+    if (pageNum === 1) setLoading(true);
+    else setLoadingMore(true);
+
+    try {
+      const response = await axios.get(`http://localhost:8000/api/v1/articles/all-articles?page=${pageNum}&limit=8`);
+      if (pageNum === 1) {
+        setArticles(response.data.articles || []);
+      } else {
+        setArticles(prev => [...prev, ...(response.data.articles || [])]);
+      }
+      setTotalPages(response.data.totalPages || 1);
+      setPage(pageNum);
+    } catch (error) {
+      console.error("Error fetching community articles:", error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <main className="px-6 md:px-12 lg:px-24 py-8">
@@ -91,6 +103,18 @@ export default function Community() {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {!loading && articles.length > 0 && page < totalPages && (
+        <div className="mt-12 flex justify-center">
+          <button 
+            onClick={() => fetchArticles(page + 1)}
+            disabled={loadingMore}
+            className="px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+          >
+            {loadingMore ? "Loading..." : "Load More Posts"}
+          </button>
         </div>
       )}
     </main>

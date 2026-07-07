@@ -70,22 +70,7 @@ const SideBar = ({
               </li>
             ))}
 
-            <div className="h-px bg-gray-200 my-2" />
 
-            <li
-              onClick={() => {
-                navigate("/saved");
-                onClose();
-              }}
-              className={`cursor-pointer px-3 py-2 rounded hover:bg-gray-100 flex items-center gap-2 ${
-                selectedCategory === "saved"
-                  ? "font-bold text-black underline"
-                  : "text-gray-700"
-              }`}
-            >
-              <Bookmark size={18} />
-              Saved Articles
-            </li>
 
 
           </ul>

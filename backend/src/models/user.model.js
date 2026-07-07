@@ -18,12 +18,7 @@ const userSchema = new Schema({
         type: String,
         required: [true, "Password is required"],    
     },
-    savedArticles: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Article"
-        }
-    ],
+
     profileImage: {
         type: String
     }

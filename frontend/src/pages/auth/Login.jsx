@@ -55,7 +55,7 @@ export default function Login() {
       <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 p-8 w-full max-w-md animate-fade-in">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome Back</h2>
-          <p className="text-gray-500">Log in to access your saved articles and preferences.</p>
+          <p className="text-gray-500">Log in to access your account and preferences.</p>
         </div>
 
         {message && (

@@ -4,7 +4,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Category from "./pages/category/[slug]/Category";
 import Search from "./pages/search/Search";
-import Saved from "./pages/saved/Saved";
+
 import Article from "./pages/article/[id]/Article";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
@@ -52,7 +52,7 @@ export default function App() {
               </ProtectedRoute>
             } />
             <Route path="/search" element={<Search />} />
-            <Route path="/saved" element={<Saved />} />
+
             <Route path="/article/:id" element={<Article />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />

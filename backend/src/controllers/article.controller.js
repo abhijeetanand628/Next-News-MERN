@@ -81,15 +81,41 @@ export const createNewArticle = async(req, res) => {
 
 export const getAllArticles = async(req, res) => {
     try {
-        // 1. Fetch all articles
-        const articles = await Article.find().populate("author", "name");
+        const { search = "", page = 1, limit = 10 } = req.query;
+        
+        let query = {};
+        if (search) {
+            query = {
+                $or: [
+                    { title: { $regex: search, $options: "i" } },
+                    { description: { $regex: search, $options: "i" } },
+                    { category: { $regex: search, $options: "i" } }
+                ]
+            };
+        }
+
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const totalArticles = await Article.countDocuments(query);
+
+        // 1. Fetch articles
+        const articles = await Article.find(query)
+            .populate("author", "name")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limitNumber);
 
         // 2. Send response
         return res
         .status(200)
         .json({
             message: "Articles fetched successfully",
-            articles
+            articles,
+            totalArticles,
+            totalPages: Math.ceil(totalArticles / limitNumber),
+            currentPage: pageNumber
         })
 
     } catch (error) {
@@ -167,13 +193,33 @@ export const getMyArticles = async(req, res) => {
         // 3. Fetch articles written by the user
         const articles = await Article.find({author: userId}).sort({ createdAt: -1 });
 
-        // 4. Send Response
+        // 4. Calculate aggregate statistics
+        let totalViews = 0;
+        let totalLikes = 0;
+        let totalComments = 0;
+        // let totalShares = 0;
+
+        articles.forEach(article => {
+            totalViews += article.viewsCount || 0;
+            totalLikes += article.likesCount || 0;
+            totalComments += article.commentsCount || 0;
+            // totalShares += article.sharesCount || 0;
+        });
+
+        // 5. Send Response
         return res
         .status(200)
         .json({
             success: true,
             message: "My articles fetched successfully",
-            articles
+            articles,
+            stats: {
+                totalPosts: articles.length,
+                totalLikes,
+                totalViews,
+                totalComments,
+                // totalShares
+            }
         })
 
     } catch (error) {
@@ -398,6 +444,36 @@ export const likeArticle = async(req, res) => {
 
     } catch (error) {
         console.log("Error in liking article : ", error);
+        return res
+        .status(500)
+        .json({
+            message: "Server error"
+        })
+    }
+}
+
+
+export const getLikedArticles = async(req, res) => {
+    try {
+        // 1. Grab data
+        const userId = req.user._id;
+        
+        // 2. Find articles where the user's ID is in the 'likes' array
+        const articles = await Article.find({ likes: userId })
+        .populate('author', 'name')
+        .sort({updatedAt: -1})
+
+        // 3. Send response
+        return res
+        .status(200)
+        .json({
+            success: true,
+            message: "Liked articles fetched successfully",
+            articles
+        })
+        
+    } catch (error) {
+        console.log("Error in getting liked articles : ", error);
         return res
         .status(500)
         .json({

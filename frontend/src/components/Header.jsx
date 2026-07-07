@@ -162,8 +162,6 @@ const Header = () => {
   useEffect(() => {
     if (urlCategory) {
       setSelectedCategory(urlCategory);
-    } else if (pathname === "/saved") {
-      setSelectedCategory("saved");
     } else {
       setSelectedCategory(null);
     }
