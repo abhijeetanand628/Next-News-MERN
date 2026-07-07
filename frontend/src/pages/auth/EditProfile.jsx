@@ -413,41 +413,44 @@ export default function EditProfile() {
 
               {/* STATS BANNER */}
               {userStats && myPosts.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                  <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl flex items-center gap-4">
-                    <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
-                      <FileText size={20} />
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+                  <div className="bg-blue-50/50 border border-blue-100 p-4 sm:p-5 rounded-2xl flex flex-col gap-2 sm:gap-3 items-start transition-all hover:shadow-sm">
+                    <div className="p-2 sm:p-3 bg-blue-100 text-blue-600 rounded-xl">
+                      <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium">Posts</p>
-                      <h4 className="text-2xl font-bold text-gray-900">{userStats.totalPosts || 0}</h4>
+                      <p className="text-xs sm:text-sm text-gray-500 font-medium mb-1">Posts</p>
+                      <h4 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-none">{userStats.totalPosts || 0}</h4>
                     </div>
                   </div>
-                  <div className="bg-purple-50/50 border border-purple-100 p-4 rounded-2xl flex items-center gap-4">
-                    <div className="p-3 bg-purple-100 text-purple-600 rounded-xl">
-                      <Eye size={20} />
+                  
+                  <div className="bg-purple-50/50 border border-purple-100 p-4 sm:p-5 rounded-2xl flex flex-col gap-2 sm:gap-3 items-start transition-all hover:shadow-sm">
+                    <div className="p-2 sm:p-3 bg-purple-100 text-purple-600 rounded-xl">
+                      <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium">Views</p>
-                      <h4 className="text-2xl font-bold text-gray-900">{userStats.totalViews || 0}</h4>
+                      <p className="text-xs sm:text-sm text-gray-500 font-medium mb-1">Views</p>
+                      <h4 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-none">{userStats.totalViews || 0}</h4>
                     </div>
                   </div>
-                  <div className="bg-red-50/50 border border-red-100 p-4 rounded-2xl flex items-center gap-4">
-                    <div className="p-3 bg-red-100 text-red-600 rounded-xl">
-                      <Heart size={20} />
+
+                  <div className="bg-red-50/50 border border-red-100 p-4 sm:p-5 rounded-2xl flex flex-col gap-2 sm:gap-3 items-start transition-all hover:shadow-sm">
+                    <div className="p-2 sm:p-3 bg-red-100 text-red-600 rounded-xl">
+                      <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium">Likes</p>
-                      <h4 className="text-2xl font-bold text-gray-900">{userStats.totalLikes || 0}</h4>
+                      <p className="text-xs sm:text-sm text-gray-500 font-medium mb-1">Likes</p>
+                      <h4 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-none">{userStats.totalLikes || 0}</h4>
                     </div>
                   </div>
-                  <div className="bg-green-50/50 border border-green-100 p-4 rounded-2xl flex items-center gap-4">
-                    <div className="p-3 bg-green-100 text-green-600 rounded-xl">
-                      <BarChart2 size={20} />
+
+                  <div className="bg-green-50/50 border border-green-100 p-4 sm:p-5 rounded-2xl flex flex-col gap-2 sm:gap-3 items-start transition-all hover:shadow-sm">
+                    <div className="p-2 sm:p-3 bg-green-100 text-green-600 rounded-xl">
+                      <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium">Comments</p>
-                      <h4 className="text-2xl font-bold text-gray-900">{userStats.totalComments || 0}</h4>
+                      <p className="text-xs sm:text-sm text-gray-500 font-medium mb-1">Comments</p>
+                      <h4 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-none">{userStats.totalComments || 0}</h4>
                     </div>
                   </div>
                 </div>
