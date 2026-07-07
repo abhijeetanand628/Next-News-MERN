@@ -72,6 +72,7 @@ export default function EditProfile() {
         headers: getAuthHeaders()
       });
       setMyPosts(response.data.articles || []);
+      setUserStats(response.data.stats || null);
     } catch (err) {
       showMsg("Failed to load your posts", true);
     } finally {
@@ -409,6 +410,48 @@ export default function EditProfile() {
                   Write New Post
                 </button>
               </div>
+
+              {/* STATS BANNER */}
+              {userStats && myPosts.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                  <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl flex items-center gap-4">
+                    <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                      <FileText size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 font-medium">Posts</p>
+                      <h4 className="text-2xl font-bold text-gray-900">{userStats.totalPosts || 0}</h4>
+                    </div>
+                  </div>
+                  <div className="bg-purple-50/50 border border-purple-100 p-4 rounded-2xl flex items-center gap-4">
+                    <div className="p-3 bg-purple-100 text-purple-600 rounded-xl">
+                      <Eye size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 font-medium">Views</p>
+                      <h4 className="text-2xl font-bold text-gray-900">{userStats.totalViews || 0}</h4>
+                    </div>
+                  </div>
+                  <div className="bg-red-50/50 border border-red-100 p-4 rounded-2xl flex items-center gap-4">
+                    <div className="p-3 bg-red-100 text-red-600 rounded-xl">
+                      <Heart size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 font-medium">Likes</p>
+                      <h4 className="text-2xl font-bold text-gray-900">{userStats.totalLikes || 0}</h4>
+                    </div>
+                  </div>
+                  <div className="bg-green-50/50 border border-green-100 p-4 rounded-2xl flex items-center gap-4">
+                    <div className="p-3 bg-green-100 text-green-600 rounded-xl">
+                      <BarChart2 size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 font-medium">Comments</p>
+                      <h4 className="text-2xl font-bold text-gray-900">{userStats.totalComments || 0}</h4>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {loadingPosts ? (
                 <div className="flex justify-center py-12">
