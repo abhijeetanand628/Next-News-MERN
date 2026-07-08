@@ -17,10 +17,9 @@ export default function Search() {
 
     const fetchSearch = async () => {
       try {
-        const apiKey = import.meta.env.VITE_NEWS_API_KEY;
         const [newsRes, communityRes] = await Promise.all([
-          fetch(`https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}`),
-          axios.get(`http://localhost:8000/api/v1/articles/all-articles?search=${query}&limit=6`)
+          fetch(`${import.meta.env.VITE_API_URL}/api/v1/news/everything?q=${query}`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/articles/all-articles?search=${query}&limit=6`)
         ]);
         
         const newsData = await newsRes.json();

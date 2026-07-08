@@ -23,8 +23,7 @@ export default function CategoryPage() {
     const fetchCategoryNews = async () => {
       setLoading(true);
       try {
-        const apiKey = import.meta.env.VITE_NEWS_API_KEY;
-        const response = await fetch(`https://newsapi.org/v2/top-headlines?country=us&category=${slug}&apiKey=${apiKey}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/news/top-headlines?country=us&category=${slug}`);
         const data = await response.json();
         setNews(data.articles || []);
       } catch (err) {

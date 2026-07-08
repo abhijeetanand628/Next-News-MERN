@@ -56,7 +56,7 @@ export default function WritePost() {
         data.append("articleImage", formData.articleImage);
       }
 
-      await axios.post("http://localhost:8000/api/v1/articles/new-article", data, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/articles/new-article`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

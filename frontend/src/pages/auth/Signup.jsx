@@ -33,7 +33,7 @@ export default function Signup() {
         dataToSend.append("profileImage", profileImage);
       }
 
-      const response = await axios.post("http://localhost:8000/api/v1/users/signup", dataToSend, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/signup`, dataToSend, {
         headers: {
           "Content-Type": "multipart/form-data"
         }

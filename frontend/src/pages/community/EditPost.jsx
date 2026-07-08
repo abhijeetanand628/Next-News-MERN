@@ -29,7 +29,7 @@ export default function EditPost() {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/v1/articles/article/${id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/articles/article/${id}`);
         const article = response.data.article;
         
         // Ensure only the author can edit (basic frontend check)
@@ -85,7 +85,7 @@ export default function EditPost() {
         data.append("articleImage", formData.articleImage);
       }
 
-      await axios.patch(`http://localhost:8000/api/v1/articles/article/${id}/update`, data, {
+      await axios.patch(`${import.meta.env.VITE_API_URL}/api/v1/articles/article/${id}/update`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

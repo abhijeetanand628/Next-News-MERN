@@ -30,7 +30,7 @@ export default function Community() {
     else setLoadingMore(true);
 
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/articles/all-articles?page=${pageNum}&limit=8`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/articles/all-articles?page=${pageNum}&limit=8`);
       if (pageNum === 1) {
         setArticles(response.data.articles || []);
       } else {

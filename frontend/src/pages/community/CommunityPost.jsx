@@ -55,8 +55,8 @@ export default function CommunityPost() {
     const fetchPostAndComments = async () => {
       try {
         const [postRes, commentsRes] = await Promise.all([
-          axios.get(`http://localhost:8000/api/v1/articles/article/${id}`),
-          axios.get(`http://localhost:8000/api/v1/comments/all-comments/${id}`)
+          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/articles/article/${id}`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/comments/all-comments/${id}`)
         ]);
         
         setPost(postRes.data.article);
@@ -79,7 +79,7 @@ export default function CommunityPost() {
     
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(`http://localhost:8000/api/v1/articles/article/${id}/like`, {}, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/articles/article/${id}/like`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -100,7 +100,7 @@ export default function CommunityPost() {
     
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(`http://localhost:8000/api/v1/articles/article/${id}/save`, {}, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/articles/article/${id}/save`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -124,7 +124,7 @@ export default function CommunityPost() {
     if (deleteTarget.type === 'post') {
       try {
         const token = localStorage.getItem("token");
-        await axios.delete(`http://localhost:8000/api/v1/articles/article/${id}/delete`, {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/articles/article/${id}/delete`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         showToast("Post deleted successfully", "success");
@@ -136,7 +136,7 @@ export default function CommunityPost() {
     } else if (deleteTarget.type === 'comment') {
       try {
         const token = localStorage.getItem("token");
-        await axios.delete(`http://localhost:8000/api/v1/comments/delete-comment/${deleteTarget.id}`, {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/comments/delete-comment/${deleteTarget.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setComments(comments.filter(c => c._id !== deleteTarget.id));
@@ -163,7 +163,7 @@ export default function CommunityPost() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `http://localhost:8000/api/v1/comments/new-comment/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/comments/new-comment/${id}`,
         { content: newComment },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -197,7 +197,7 @@ export default function CommunityPost() {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.patch(`http://localhost:8000/api/v1/comments/update-comment/${commentId}`, 
+      await axios.patch(`${import.meta.env.VITE_API_URL}/api/v1/comments/update-comment/${commentId}`, 
         { content: editCommentContent },
         { headers: { Authorization: `Bearer ${token}` } }
       );

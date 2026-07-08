@@ -72,7 +72,7 @@ export default function EditProfile() {
   const fetchMyPosts = async () => {
     setLoadingPosts(true);
     try {
-      const response = await axios.get("http://localhost:8000/api/v1/articles/my-articles", {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/articles/my-articles`, {
         headers: getAuthHeaders()
       });
       setMyPosts(response.data.articles || []);
@@ -87,7 +87,7 @@ export default function EditProfile() {
   const fetchLikedPosts = async () => {
     setLoadingLiked(true);
     try {
-      const response = await axios.get("http://localhost:8000/api/v1/articles/liked-articles", {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/articles/liked-articles`, {
         headers: getAuthHeaders()
       });
       setLikedPosts(response.data.articles || []);
@@ -101,7 +101,7 @@ export default function EditProfile() {
   const fetchSavedPosts = async () => {
     setLoadingSaved(true);
     try {
-      const response = await axios.get("http://localhost:8000/api/v1/articles/saved-articles", {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/articles/saved-articles`, {
         headers: getAuthHeaders()
       });
       setSavedPosts(response.data.articles || []);
@@ -141,7 +141,7 @@ export default function EditProfile() {
       const formData = new FormData();
       formData.append("profileImage", selectedImage);
 
-      const response = await axios.patch("http://localhost:8000/api/v1/users/profile-image", formData, {
+      const response = await axios.patch(`${import.meta.env.VITE_API_URL}/api/v1/users/profile-image`, formData, {
         headers: {
           ...getAuthHeaders(),
           "Content-Type": "multipart/form-data"
@@ -162,7 +162,7 @@ export default function EditProfile() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.patch("http://localhost:8000/api/v1/users/update-account", accountData, {
+      const response = await axios.patch(`${import.meta.env.VITE_API_URL}/api/v1/users/update-account`, accountData, {
         headers: getAuthHeaders()
       });
       
@@ -179,7 +179,7 @@ export default function EditProfile() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.patch("http://localhost:8000/api/v1/users/update-password", passwordData, {
+      await axios.patch(`${import.meta.env.VITE_API_URL}/api/v1/users/update-password`, passwordData, {
         headers: getAuthHeaders()
       });
       
