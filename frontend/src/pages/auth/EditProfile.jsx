@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Camera, Save, Lock, User, FileText, Edit, Eye, LogOut, Heart, Trash2, BarChart2 } from "lucide-react";
+import { Camera, Save, Lock, User, FileText, Edit, Eye, LogOut, Heart, Trash2, BarChart2, Bookmark } from "lucide-react";
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -29,6 +29,8 @@ export default function EditProfile() {
   // New States
   const [likedPosts, setLikedPosts] = useState([]);
   const [loadingLiked, setLoadingLiked] = useState(false);
+  const [savedPosts, setSavedPosts] = useState([]);
+  const [loadingSaved, setLoadingSaved] = useState(false);
   const [userStats, setUserStats] = useState(null);
 
   useEffect(() => {
@@ -62,6 +64,8 @@ export default function EditProfile() {
       fetchMyPosts();
     } else if (activeTab === "liked") {
       fetchLikedPosts();
+    } else if (activeTab === "saved") {
+      fetchSavedPosts();
     }
   }, [activeTab]);
 
@@ -91,6 +95,20 @@ export default function EditProfile() {
       showMsg("Failed to load liked posts", true);
     } finally {
       setLoadingLiked(false);
+    }
+  };
+
+  const fetchSavedPosts = async () => {
+    setLoadingSaved(true);
+    try {
+      const response = await axios.get("http://localhost:8000/api/v1/articles/saved-articles", {
+        headers: getAuthHeaders()
+      });
+      setSavedPosts(response.data.articles || []);
+    } catch (err) {
+      showMsg("Failed to load saved posts", true);
+    } finally {
+      setLoadingSaved(false);
     }
   };
 
@@ -229,6 +247,16 @@ export default function EditProfile() {
           >
             <Heart size={18} />
             <span className="font-medium">Liked Posts</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("saved")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+              activeTab === "saved" ? "bg-black text-white" : "hover:bg-gray-100 text-gray-600 hover:text-black"
+            }`}
+          >
+            <Bookmark size={18} />
+            <span className="font-medium">Saved Posts</span>
           </button>
 
           <button
@@ -544,6 +572,60 @@ export default function EditProfile() {
                         
                         <div className="flex items-center gap-4 text-xs font-medium text-gray-500 mb-4 mt-auto">
                           <span className="flex items-center gap-1 font-semibold text-gray-700">✍️ {post.author?.name || "Unknown"}</span>
+                          <span className="flex items-center gap-1">❤️ {post.likes?.length || 0}</span>
+                        </div>
+                        
+                        <div className="flex gap-2 pt-4 border-t border-gray-100">
+                          <button 
+                            onClick={() => navigate(`/post/${post._id}`)}
+                            className="flex-1 flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            <Eye size={16} /> Read Article
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "saved" && (
+            <div className="mt-8 animate-fade-in">
+              <div className="flex justify-between items-center mb-6 border-b pb-4">
+                <h3 className="text-xl font-semibold text-gray-900">Saved Posts</h3>
+              </div>
+              
+              {loadingSaved ? (
+                <div className="flex justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                </div>
+              ) : savedPosts.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
+                  <Bookmark className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                  <p className="text-gray-500 font-medium">You haven't saved any posts yet.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {savedPosts.map((post) => (
+                    <div key={post._id} className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col">
+                      <div className="h-40 overflow-hidden relative">
+                        <img 
+                          src={post.articleImage} 
+                          alt={post.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-blue-600 uppercase tracking-wider">
+                          {post.category}
+                        </div>
+                      </div>
+                      <div className="p-5 flex flex-col flex-1">
+                        <h4 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">{post.title}</h4>
+                        
+                        <div className="flex items-center gap-4 text-xs font-medium text-gray-500 mb-4 mt-auto">
+                          <span className="flex items-center gap-1 font-semibold text-gray-700">✍️ {post.author?.name || "Unknown"}</span>
+                          <span className="flex items-center gap-1">👁 {post.viewsCount || 0}</span>
                           <span className="flex items-center gap-1">❤️ {post.likes?.length || 0}</span>
                         </div>
                         

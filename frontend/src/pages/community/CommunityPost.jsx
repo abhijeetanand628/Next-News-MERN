@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { Bookmark } from "lucide-react";
 
 function timeAgo(dateString) {
   if (!dateString) return "";
@@ -88,6 +89,32 @@ export default function CommunityPost() {
     } catch (err) {
       console.error(err);
       showToast("Failed to like post", "error");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) {
+      showToast("Please login to save this post", "error");
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(`http://localhost:8000/api/v1/articles/article/${id}/save`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      // Update local storage and state user
+      const updatedUser = res.data.savedUser;
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      // Dispatch storage event to keep other tabs/components in sync
+      window.dispatchEvent(new Event("storage"));
+      showToast(updatedUser.savedArticles.includes(id) ? "Article saved successfully" : "Article removed from saved", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save post", "error");
     }
   };
 
@@ -207,6 +234,7 @@ export default function CommunityPost() {
 
   const isAuthor = user && post.author && user._id === post.author._id;
   const hasLiked = user && post.likes?.includes(user._id);
+  const hasSaved = user && user.savedArticles?.includes(id);
 
   return (
     <main className="bg-gray-50 min-h-screen text-gray-900 py-12 px-6 sm:px-12 relative">
@@ -279,6 +307,18 @@ export default function CommunityPost() {
               <span className="text-gray-500 text-sm flex items-center gap-1">
                 👁 {post.viewsCount || 0} views
               </span>
+              <button 
+                onClick={handleSave}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-sm font-medium cursor-pointer ${
+                  hasSaved 
+                    ? "bg-blue-50 border-blue-200 text-blue-600" 
+                    : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
+                }`}
+                title={hasSaved ? "Unsave Article" : "Save Article"}
+              >
+                <Bookmark size={16} className={hasSaved ? "fill-blue-600" : ""} />
+                {hasSaved ? "Saved" : "Save"} 
+              </button>
               <button 
                 onClick={handleLike}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-sm font-medium cursor-pointer ${
