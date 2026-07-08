@@ -1,4 +1,5 @@
 import { Article } from "../models/article.model.js";
+import { User } from "../models/user.model.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 
 export const createNewArticle = async(req, res) => {
@@ -474,6 +475,129 @@ export const getLikedArticles = async(req, res) => {
         
     } catch (error) {
         console.log("Error in getting liked articles : ", error);
+        return res
+        .status(500)
+        .json({
+            message: "Server error"
+        })
+    }
+}
+
+
+export const toggleSavedArticle = async(req, res) => {
+    try {
+        // 1. Grab data
+        const {articleId} = req.params;
+        const userId = req.user._id;
+        
+        // 2. Validate data
+        if(!articleId || !userId)
+        {
+            return res
+            .status(400)
+            .json({
+                message: "Article ID and User ID are required"
+            })
+        }
+
+        // 3. Find article
+        const article = await Article.findById(articleId);
+
+        if(!article)
+        {
+            return res
+            .status(404)
+            .json({
+                message: "Article not found"
+            })
+        }
+
+        // 4. Check if user already saved
+        const savedUser = await User.findById(userId);
+
+        if(!savedUser)
+        {
+            return res
+            .status(400)
+            .json({
+                message: "User not found"
+            })
+        }
+
+        // 5. Toggle the article in savedArticles
+        const isSaved = savedUser.savedArticles.includes(articleId);
+
+        if(isSaved)
+        {
+            // Remove article
+            savedUser.savedArticles.pull(articleId);
+            savedUser.savedCount--;
+        }
+        else
+        {
+            // Add article
+            savedUser.savedArticles.push(articleId);
+            savedUser.savedCount++;
+        }
+
+        await savedUser.save();
+
+        // 6. Send response
+        return res
+        .status(200)
+        .json({
+            message: "Article toggled successfully",
+            savedUser
+        })
+
+    } catch (error) {
+        console.log("Error in toggling saved article : ", error);
+        return res
+        .status(500)
+        .json({
+            message: "Server error"
+        })
+    }
+}
+
+
+export const getSavedArticles = async(req, res) => {
+    try {
+        // 1. Grab data
+        const userId = req.user._id;
+
+        // 2. Validate user
+        if(!userId)
+        {
+            return res
+            .status(400)
+            .json({
+                message: "User ID is required"
+            })
+        }
+
+        // 3. Find articles saved by user
+        const user = await User.findById(userId).select("savedArticles");
+        
+        if(!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const articles = await Article.find({ _id: { $in: user.savedArticles } })
+        .populate('author', 'name')
+        .sort({updatedAt: -1})
+
+        // 4. Send response
+        return res
+        .status(200)
+        .json({
+            success: true,
+            message: "Saved articles fetched successfully",
+            articles
+        })
+        
+    } catch (error) {
+        console.log("Error in getting saved articles : ", error);
         return res
         .status(500)
         .json({

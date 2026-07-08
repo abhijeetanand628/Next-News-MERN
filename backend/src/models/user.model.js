@@ -21,6 +21,14 @@ const userSchema = new Schema({
 
     profileImage: {
         type: String
+    },
+    savedArticles: [{
+        type: Schema.Types.ObjectId,
+        ref: "Article"
+    }],
+    savedCount: {
+        type: Number,
+        default: 0
     }
 }, {timestamps: true})
 
