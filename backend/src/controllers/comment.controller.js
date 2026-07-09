@@ -7,6 +7,7 @@ export const addComment = async(req, res) => {
         const {content} = req.body;
         const articleId = req.params.articleId;
         const userId = req.user?._id;
+        const parentCommentId = req.body.parentCommentId;
 
         // 2. Vaidation
         if(!content || !articleId){
@@ -34,6 +35,7 @@ export const addComment = async(req, res) => {
             content,
             article: articleId,
             owner: userId,
+            parentComment: parentCommentId
         })
 
         // 5. Push this comment ID into Article's comments array
@@ -246,6 +248,70 @@ export const editComment = async(req, res) => {
         .json({
             success: false,
             message: "Server error while updating comment",
+            error: error.message
+        })
+    }
+}
+
+
+export const likeComment = async(req, res) => {
+    try {
+        // 1. Grab data
+        const commentId = req.params.commentId;
+        const userId = req.user._id;
+
+        // 2. Validate data
+        if(!commentId || !userId)
+        {
+            return res
+            .status(400)
+            .json({
+                message: "Invalid request, comment ID or user missing"
+            })
+        }
+
+        // 3. Find comment
+        const comment = await Comment.findById(commentId)
+
+        if(!comment)
+        {
+            return res
+            .status(400)
+            .json({
+                message: "Comment not found"
+            })
+        }
+
+        // 4. Check if user has already liked
+        if(comment.likes.includes(userId))
+        {
+            // Unlike
+            comment.likes.pull(userId)
+        }
+        else
+        {
+            // Like
+            comment.likes.push(userId)
+        }
+
+        // 5. Save comment
+        await comment.save();
+
+        // 6. Send response
+        return res
+        .status(200)
+        .json({
+            message: "Comment liked successfully",
+            comment
+        })
+
+    } catch (error) {
+        console.log("Error in liking comment : ", error);
+        return res
+        .status(500)
+        .json({
+            success: false,
+            message: "Server error while liking comment",
             error: error.message
         })
     }
