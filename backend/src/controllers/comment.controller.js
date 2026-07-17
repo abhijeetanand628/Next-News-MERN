@@ -156,24 +156,33 @@ export const deleteComment = async(req, res) => {
             })
         }
 
-    // 5. Delete comment from DB
-    await comment.deleteOne();
+        const replies = await Comment.find({
+            parentComment: commentId
+        })
+        const replyIds = replies.map(reply => reply._id);
 
-    // 6. Remove comment from article's comment array
-    await Article.findByIdAndUpdate(comment.article, {
-        $pull: {
-            comments: commentId
-        }
-    }, {new: true})
+        // Delete Replies from DB
+        await Comment.deleteMany({ parentComment: commentId });
 
-    // 7. Send Response
-    return res
-    .status(200)
-    .json({
-        message: "Comment deleted successfully",
-        deletedComment: comment
-    })
+        // 5. Delete comment from DB
+        await comment.deleteOne();
 
+        const idsToRemove = [commentId, ...replyIds];
+
+        // 6. Remove parent comment AND replies from article's comment array
+        await Article.findByIdAndUpdate(comment.article, {
+            $pullAll: {
+                comments: idsToRemove
+            }
+        }, {new: true})
+
+        // 7. Send Response
+        return res
+        .status(200)
+        .json({
+            message: "Comment deleted successfully",
+            deletedComment: comment
+        })
 
     } catch (error) {
         console.log("Error in deleting comment : ", error);

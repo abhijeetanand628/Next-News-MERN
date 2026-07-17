@@ -26,6 +26,8 @@ export default function CommunityPost() {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editCommentContent, setEditCommentContent] = useState("");
+  const [replyingToId, setReplyingToId] = useState(null);
+  const [replyContent, setReplyContent] = useState("");
   const [user, setUser] = useState(null);
 
   const [toastMsg, setToastMsg] = useState("");
@@ -184,6 +186,50 @@ export default function CommunityPost() {
       showToast("Failed to add comment", "error");
     } finally {
       setSubmittingComment(false);
+    }
+  };
+
+  const handleReplySubmit = async (parentId) => {
+    if (!replyContent.trim() || !user) return;
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/v1/comments/new-comment/${id}`,
+        { content: replyContent, parentCommentId: parentId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const commentToAdd = {
+        ...res.data.comment,
+        owner: { _id: user._id, name: user.name, profileImage: user.profileImage },
+        likes: []
+      };
+      setComments([...comments, commentToAdd]);
+      setReplyContent("");
+      setReplyingToId(null);
+      showToast("Reply added", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to add reply", "error");
+    }
+  };
+
+  const handleLikeComment = async (commentId) => {
+    if (!user) {
+      showToast("Please login to like this comment", "error");
+      return;
+    }
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/comments/like-comment/${commentId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const updatedComment = res.data.comment;
+      setComments(comments.map(c => 
+        c._id === commentId ? { ...c, likes: updatedComment.likes } : c
+      ));
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to like comment", "error");
     }
   };
 
@@ -419,78 +465,171 @@ export default function CommunityPost() {
             {comments.length === 0 ? (
               <p className="text-gray-500 italic">No comments yet. Be the first to share your thoughts!</p>
             ) : (
-              comments.map((comment) => (
-                <div key={comment._id} className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-200">
-                    {comment.owner?.profileImage ? (
-                      <img src={comment.owner.profileImage} alt="User" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="font-bold text-gray-400">
-                        {comment.owner?.name ? comment.owner.name[0].toUpperCase() : "U"}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 bg-gray-50 rounded-2xl rounded-tl-none p-4 border border-gray-100">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <span className="font-semibold text-gray-900 mr-2">{comment.owner?.name || "Unknown User"}</span>
-                        <span className="text-xs text-gray-500">{timeAgo(comment.createdAt)}</span>
-                      </div>
-                      {user && comment.owner && user._id === comment.owner._id && (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => {
-                              setEditingCommentId(comment._id);
-                              setEditCommentContent(comment.content);
-                            }}
-                            className="px-3 py-1 text-gray-700 bg-white hover:bg-gray-100 transition-colors border border-gray-300 rounded text-xs font-medium cursor-pointer"
-                            title="Edit Comment"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteComment(comment._id)}
-                            className="px-3 py-1 text-white bg-red-500 hover:bg-red-600 transition-color border border-red-200 rounded text-xs font-medium cursor-pointer"
-                            title="Delete Comment"
-                          >
-                            Delete
-                          </button>
-                        </div>
+              comments.filter(c => !c.parentComment).map((comment) => (
+                <div key={comment._id} className="flex flex-col gap-4">
+                  <div className="flex gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-200">
+                      {comment.owner?.profileImage ? (
+                        <img src={comment.owner.profileImage} alt="User" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-bold text-gray-400">
+                          {comment.owner?.name ? comment.owner.name[0].toUpperCase() : "U"}
+                        </span>
                       )}
                     </div>
                     
-                    {editingCommentId === comment._id ? (
-                      <div className="mt-2">
-                        <textarea
-                          value={editCommentContent}
-                          onChange={(e) => setEditCommentContent(e.target.value)}
-                          className="w-full border border-gray-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all text-sm"
-                          rows={2}
-                        />
-                        <div className="flex justify-end gap-2 mt-2">
-                          <button
-                            onClick={() => {
-                              setEditingCommentId(null);
-                              setEditCommentContent("");
-                            }}
-                            className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-300 transition-colors cursor-pointer"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => handleEditCommentSubmit(comment._id)}
-                            disabled={!editCommentContent.trim()}
-                            className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer"
-                          >
-                            Save
-                          </button>
+                    <div className="flex-1 bg-gray-50 rounded-2xl rounded-tl-none p-4 border border-gray-100">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="font-semibold text-gray-900 mr-2">{comment.owner?.name || "Unknown User"}</span>
+                          <span className="text-xs text-gray-500">{timeAgo(comment.createdAt)}</span>
                         </div>
+                        {user && comment.owner && user._id === comment.owner._id && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingCommentId(comment._id);
+                                setEditCommentContent(comment.content);
+                              }}
+                              className="px-3 py-1 text-gray-700 bg-white hover:bg-gray-100 transition-colors border border-gray-300 rounded text-xs font-medium cursor-pointer"
+                              title="Edit Comment"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteComment(comment._id)}
+                              className="px-3 py-1 text-white bg-red-500 hover:bg-red-600 transition-color border border-red-200 rounded text-xs font-medium cursor-pointer"
+                              title="Delete Comment"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
-                    )}
+                      
+                      {editingCommentId === comment._id ? (
+                        <div className="mt-2">
+                          <textarea
+                            value={editCommentContent}
+                            onChange={(e) => setEditCommentContent(e.target.value)}
+                            className="w-full border border-gray-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all text-sm"
+                            rows={2}
+                          />
+                          <div className="flex justify-end gap-2 mt-2">
+                            <button
+                              onClick={() => {
+                                setEditingCommentId(null);
+                                setEditCommentContent("");
+                              }}
+                              className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-300 transition-colors cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handleEditCommentSubmit(comment._id)}
+                              disabled={!editCommentContent.trim()}
+                              className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                      )}
+
+                      <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-200">
+                        <button
+                          onClick={() => handleLikeComment(comment._id)}
+                          className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${user && comment.likes?.includes(user._id) ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                        >
+                          {user && comment.likes?.includes(user._id) ? "❤️" : "🤍"} 
+                          <span>{comment.likes?.length || 0} Likes</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => setReplyingToId(replyingToId === comment._id ? null : comment._id)}
+                          className="text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                        >
+                          💬 Reply
+                        </button>
+                      </div>
+
+                      {replyingToId === comment._id && (
+                        <div className="mt-4 flex gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden">
+                             {user?.profileImage ? <img src={user.profileImage} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">{user?.name?.[0]?.toUpperCase()}</div>}
+                          </div>
+                          <div className="flex-1">
+                            <textarea
+                              value={replyContent}
+                              onChange={(e) => setReplyContent(e.target.value)}
+                              placeholder="Write a reply..."
+                              className="w-full border border-gray-300 rounded-lg p-2 text-sm outline-none focus:border-blue-500"
+                              rows={2}
+                            />
+                            <div className="flex justify-end mt-2 gap-2">
+                              <button
+                                onClick={() => { setReplyingToId(null); setReplyContent(""); }}
+                                className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => handleReplySubmit(comment._id)}
+                                disabled={!replyContent.trim()}
+                                className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+                              >
+                                Reply
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
+
+                  {comments.filter(c => c.parentComment === comment._id).length > 0 && (
+                    <div className="ml-14 pl-4 border-l-2 border-gray-200 space-y-4 mt-2">
+                      {comments.filter(c => c.parentComment === comment._id).map(reply => (
+                         <div key={reply._id} className="flex gap-4">
+                           <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-200">
+                             {reply.owner?.profileImage ? (
+                               <img src={reply.owner.profileImage} alt="User" className="w-full h-full object-cover" />
+                             ) : (
+                               <span className="font-bold text-gray-400 text-xs">
+                                 {reply.owner?.name ? reply.owner.name[0].toUpperCase() : "U"}
+                               </span>
+                             )}
+                           </div>
+                           <div className="flex-1 bg-white rounded-2xl rounded-tl-none p-4 border border-gray-100 shadow-sm">
+                             <div className="flex justify-between items-start mb-2">
+                               <div>
+                                 <span className="font-semibold text-gray-900 mr-2 text-sm">{reply.owner?.name || "Unknown User"}</span>
+                                 <span className="text-xs text-gray-500">{timeAgo(reply.createdAt)}</span>
+                               </div>
+                               {user && reply.owner && user._id === reply.owner._id && (
+                                 <div className="flex gap-2">
+                                   <button onClick={() => handleDeleteComment(reply._id)} className="text-xs text-red-500 hover:underline cursor-pointer">Delete</button>
+                                 </div>
+                               )}
+                             </div>
+                             <p className="text-gray-700 text-sm whitespace-pre-wrap">{reply.content}</p>
+                             
+                             <div className="flex items-center gap-4 mt-2 pt-2 border-t border-gray-100">
+                               <button
+                                 onClick={() => handleLikeComment(reply._id)}
+                                 className={`flex items-center gap-1.5 text-xs font-medium transition-colors cursor-pointer ${user && reply.likes?.includes(user._id) ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                               >
+                                 {user && reply.likes?.includes(user._id) ? "❤️" : "🤍"} 
+                                 <span>{reply.likes?.length || 0}</span>
+                               </button>
+                             </div>
+                           </div>
+                         </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))
             )}
