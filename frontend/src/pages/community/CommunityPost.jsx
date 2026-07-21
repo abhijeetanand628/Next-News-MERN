@@ -610,11 +610,50 @@ export default function CommunityPost() {
                                </div>
                                {user && reply.owner && user._id === reply.owner._id && (
                                  <div className="flex gap-2">
+                                   <button 
+                                     onClick={() => {
+                                       setEditingCommentId(reply._id);
+                                       setEditCommentContent(reply.content);
+                                     }} 
+                                     className="text-xs text-gray-500 hover:text-gray-800 hover:underline cursor-pointer transition-colors"
+                                   >
+                                     Edit
+                                   </button>
                                    <button onClick={() => handleDeleteComment(reply._id)} className="text-xs text-red-500 hover:underline cursor-pointer">Delete</button>
                                  </div>
                                )}
                              </div>
-                             <p className="text-gray-700 text-sm whitespace-pre-wrap">{reply.content}</p>
+                             
+                             {editingCommentId === reply._id ? (
+                               <div className="mt-2">
+                                 <textarea
+                                   value={editCommentContent}
+                                   onChange={(e) => setEditCommentContent(e.target.value)}
+                                   className="w-full border border-gray-200 rounded-xl p-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all text-sm"
+                                   rows={2}
+                                 />
+                                 <div className="flex justify-end gap-2 mt-2">
+                                   <button
+                                     onClick={() => {
+                                       setEditingCommentId(null);
+                                       setEditCommentContent("");
+                                     }}
+                                     className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-300 transition-colors cursor-pointer"
+                                   >
+                                     Cancel
+                                   </button>
+                                   <button
+                                     onClick={() => handleEditCommentSubmit(reply._id)}
+                                     disabled={!editCommentContent.trim()}
+                                     className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer"
+                                   >
+                                     Save
+                                   </button>
+                                 </div>
+                               </div>
+                             ) : (
+                               <p className="text-gray-700 text-sm whitespace-pre-wrap">{reply.content}</p>
+                             )}
                              
                              <div className="flex items-center gap-4 mt-2 pt-2 border-t border-gray-100">
                                <button
