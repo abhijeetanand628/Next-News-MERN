@@ -57,7 +57,7 @@ export const createNewArticle = async(req, res) => {
             description,
             content,
             category,
-            articleImage: articleImage.url,
+            articleImage: articleImage.secure_url,
             author: req.user._id,
         });
 
@@ -287,7 +287,7 @@ export const updateArticle = async(req, res) => {
                 })
             }
             deleteFromCloudinary(article.articleImage);
-            articleImage = uploadedImage.url;
+            articleImage = uploadedImage.secure_url;
         }
 
         // 6. Update fields
