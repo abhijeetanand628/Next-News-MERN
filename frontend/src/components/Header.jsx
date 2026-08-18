@@ -173,51 +173,50 @@ const Header = () => {
             </span>
           </div>
 
-          <div className="flex items-center gap-6 relative">
-            {showSearch && (
+          <div className="flex items-center gap-4 sm:gap-6">
+            {user?.profileImage ? (
+              <img
+                src={user.profileImage}
+                alt={user.name}
+                onClick={() => navigate("/profile")}
+                className="w-6 h-6 rounded-full object-cover cursor-pointer border border-gray-200 shrink-0"
+                title={`Logged in as ${user.name}`}
+              />
+            ) : (
+              <User
+                onClick={() => user ? navigate("/profile") : navigate("/login")}
+                className="text-gray-700 hover:text-black cursor-pointer shrink-0"
+                size={18}
+                title={user ? `Logged in as ${user.name}` : "Login"}
+              />
+            )}
+
+            <div className="flex items-center">
               <input
                 type="text"
                 placeholder="Search..."
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && runSearch()}
-                className={`absolute right-12 px-2 py-1 border rounded-lg outline-none bg-gray-200/30 focus:bg-gray-200/70 hover:bg-gray-200/70 placeholder:text-gray-400/70 transition-all duration-300 ease-in-out
+                className={`transition-all duration-300 ease-in-out outline-none bg-gray-200/30 focus:bg-gray-200/70 hover:bg-gray-200/70 placeholder:text-gray-400/70 rounded-lg overflow-hidden
                   ${
                     showSearch
-                      ? "opacity-100 scale-100 w-40 sm:w-52 md:w-60 lg:w-72"
-                      : "opacity-0 scale-90 w-0 pointer-events-none"
+                      ? "opacity-100 w-32 sm:w-40 md:w-52 lg:w-64 px-2 py-1 border mr-2 sm:mr-3"
+                      : "opacity-0 w-0 border-transparent px-0 py-1 m-0 pointer-events-none"
                   }
                 `}
               />
-            )}
-
-            {user?.profileImage ? (
-              <img
-                src={user.profileImage}
-                alt={user.name}
-                onClick={() => navigate("/profile")}
-                className="w-6 h-6 rounded-full object-cover cursor-pointer border border-gray-200"
-                title={`Logged in as ${user.name}`}
-              />
-            ) : (
-              <User
-                onClick={() => user ? navigate("/profile") : navigate("/login")}
-                className="text-gray-700 hover:text-black cursor-pointer"
+              <Search
+                onClick={search}
+                className="text-gray-700 hover:text-black cursor-pointer shrink-0"
                 size={18}
-                title={user ? `Logged in as ${user.name}` : "Login"}
               />
-            )}
-
-            <Search
-              onClick={search}
-              className="text-gray-700 hover:text-black cursor-pointer"
-              size={18}
-            />
+            </div>
 
             <button
               onClick={() => setOpen(true)}
               aria-label="Open Menu"
-              className="p-2 rounded hover:bg-gray-100 cursor-pointer"
+              className="p-2 rounded hover:bg-gray-100 cursor-pointer shrink-0"
             >
               <Menu size={20} className="text-gray-700 hover:text-black" />
             </button>
