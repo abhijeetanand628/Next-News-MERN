@@ -2,8 +2,6 @@ import {User} from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { uploadToS3 } from "../utils/s3.js";
-import { logToCloudWatch } from "../utils/cloudwatch.js";
 
 export const registerUser = async(req, res) => {
     try {
@@ -35,15 +33,14 @@ export const registerUser = async(req, res) => {
         // 4. Encrypt the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 5. Upload profile image to S3 (AWS Tier 1 Integration)
+        // 5. Upload profile image to Cloudinary
         const profileImagePath = req.files?.profileImage?.[0]?.path;
         let profileImageUrl = "";
 
         if(profileImagePath) {
-            // Replaced uploadOnCloudinary with AWS S3 integration
-            const profileImage = await uploadToS3(profileImagePath);
+            const profileImage = await uploadOnCloudinary(profileImagePath);
             if(profileImage) {
-                profileImageUrl = profileImage.url;
+                profileImageUrl = profileImage.url || profileImage.secure_url;
             }
         }
 
@@ -55,8 +52,6 @@ export const registerUser = async(req, res) => {
             ...(profileImageUrl && { profileImage: profileImageUrl })
         })
 
-        // Send audit log to AWS CloudWatch
-        await logToCloudWatch("UserAuth", { event: "UserRegistered", email: user.email, userId: user._id });
 
         // 7. Send response
         return res
@@ -68,7 +63,6 @@ export const registerUser = async(req, res) => {
 
     } catch (error) {
         console.log("Signup error : ", error);
-        await logToCloudWatch("UserAuth_Errors", { event: "RegistrationError", error: error.message });
         return res
         .status(500)
         .json({
@@ -124,8 +118,6 @@ export const loginUser = async(req, res) => {
             {expiresIn: process.env.JWT_EXPIRES_IN}
         );
 
-        // Send audit log to AWS CloudWatch
-        await logToCloudWatch("UserAuth", { event: "UserLoggedIn", email: user.email, userId: user._id });
 
         // 6. Send response
         return res
@@ -142,7 +134,6 @@ export const loginUser = async(req, res) => {
 
     } catch (error) {
         console.log("Login error : ", error);
-        await logToCloudWatch("UserAuth_Errors", { event: "LoginError", error: error.message });
         res.status(500)
         .json({
             message: "Server error"
