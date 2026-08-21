@@ -1,7 +1,7 @@
 import {User} from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 
 export const registerUser = async(req, res) => {
     try {
@@ -128,7 +128,8 @@ export const loginUser = async(req, res) => {
             user: {
                 _id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                profileImage: user.profileImage
             }
         })
 
@@ -350,5 +351,36 @@ export const updateProfileImg = async(req, res) => {
         .json({
             message: "Server error"
         })
+    }
+}
+
+export const removeProfileImg = async(req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if(!user) return res.status(404).json({ message: "User not found" });
+
+        if(user.profileImage) {
+            await deleteFromCloudinary(user.profileImage);
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $unset: {
+                    profileImage: 1
+                }
+            },
+            {
+                returnDocument: "after"
+            }
+        ).select("-password");
+
+        return res.status(200).json({
+            message: "Profile image removed successfully",
+            user: updatedUser
+        });
+    } catch (error) {
+        console.log("Remove profile image error : ", error);
+        return res.status(500).json({ message: "Server error" });
     }
 }

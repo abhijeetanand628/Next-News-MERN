@@ -134,25 +134,19 @@ export default function EditProfile() {
     }
   };
 
-  const handleImageUpload = async () => {
-    if (!selectedImage) return;
+  const handleRemoveImage = async () => {
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("profileImage", selectedImage);
-
-      const response = await axios.patch(`${import.meta.env.VITE_API_URL}/api/v1/users/profile-image`, formData, {
-        headers: {
-          ...getAuthHeaders(),
-          "Content-Type": "multipart/form-data"
-        }
+      const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/users/profile-image`, {
+        headers: getAuthHeaders()
       });
       
       updateUserStorage(response.data.user);
-      showMsg("Profile image updated successfully!");
+      setPreviewImage(null);
       setSelectedImage(null);
+      showMsg("Profile image removed successfully!");
     } catch (err) {
-      showMsg(err.response?.data?.message || "Failed to upload image", true);
+      showMsg(err.response?.data?.message || "Failed to remove image", true);
     } finally {
       setLoading(false);
     }
@@ -162,6 +156,24 @@ export default function EditProfile() {
     e.preventDefault();
     setLoading(true);
     try {
+      let latestUser = user;
+      // 1. Upload image if selected
+      if (selectedImage) {
+        const formData = new FormData();
+        formData.append("profileImage", selectedImage);
+
+        const imgResponse = await axios.patch(`${import.meta.env.VITE_API_URL}/api/v1/users/profile-image`, formData, {
+          headers: {
+            ...getAuthHeaders(),
+            "Content-Type": "multipart/form-data"
+          }
+        });
+        
+        latestUser = imgResponse.data.user;
+        setSelectedImage(null);
+      }
+
+      // 2. Update account details
       const response = await axios.patch(`${import.meta.env.VITE_API_URL}/api/v1/users/update-account`, accountData, {
         headers: getAuthHeaders()
       });
@@ -196,6 +208,7 @@ export default function EditProfile() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    window.dispatchEvent(new Event("auth-change"));
     navigate("/login");
   };
 
@@ -312,13 +325,16 @@ export default function EditProfile() {
                 
                 <div>
                   <p className="text-sm text-gray-500 mb-3">Upload a new avatar. Larger images will be resized automatically.</p>
-                  <button
-                    onClick={handleImageUpload}
-                    disabled={!selectedImage || loading}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading && selectedImage ? "Uploading..." : "Save Image"}
-                  </button>
+                  {previewImage && (
+                    <button
+                      onClick={handleRemoveImage}
+                      disabled={loading}
+                      type="button"
+                      className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Remove Image
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -359,7 +375,7 @@ export default function EditProfile() {
                     className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     <Save size={18} />
-                    {loading && !selectedImage ? "Saving..." : "Save Changes"}
+                    {loading ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </form>
